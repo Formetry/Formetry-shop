@@ -29,8 +29,25 @@
     .search-box button{padding:0 14px;border-radius:12px;border:1px solid var(--line);background:#11151b;color:var(--fg);cursor:pointer}
     .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
     .card{border:1px solid var(--line);background:linear-gradient(180deg,#0e1217,#0b0f14);border-radius:18px;overflow:hidden;display:flex;flex-direction:column}
-    .thumb{aspect-ratio:4/3;background:#0c1016;display:grid;place-items:center;border-bottom:1px solid var(--line)}
-    .thumb img{max-width:100%;max-height:100%}
+    ./* Replace your current .thumb and .thumb img rules with this */
+.thumb{
+  aspect-ratio: 4 / 3;
+  background:#0c1016;
+  border-bottom:1px solid var(--line);
+  position: relative;
+  overflow: hidden;           /* hide any overflow when we crop */
+  display: grid;
+  place-items: center;
+}
+
+.thumb img{
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;          /* fill the box and crop evenly */
+  object-position: center;    /* keep the subject centered */
+}
+
     .card-body{padding:14px}
     .title{font-weight:700;margin:0 0 6px}
     .muted{color:var(--muted);font-size:14px}
