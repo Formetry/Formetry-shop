@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Formetry – 3D Print Shop</title>
+  <!-- Google tag (gtag.js) | TODO: replace G-XXXXXXXXXX with your GA4 Measurement ID -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXXXXX');   /* ⬅️ put your real Measurement ID here */
+  </script>
+  <link rel="icon" id="favicon" href="Logo (black background).png">
+  <style>
+    :root{ --bg:#0b0d10; --fg:#f4f6f8; --muted:#c7ccd1; --pri:#6ee7ff; --pri-2:#8b5cf6; --line:#20242c; }
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,#0a0c10,#0b0d10 30%);color:var(--fg);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Helvetica,Arial}
+    .container{max-width:1100px;margin:0 auto;padding:24px}
+    .hero{display:flex;flex-direction:column;align-items:center;gap:16px;padding:42px 0 10px}
+    .hero-logo{height:96px}
+    .hero-title{font-size:42px;font-weight:800;margin:0}
+    .filters{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:12px 0 20px}
+    .filters button{padding:8px 14px;border-radius:12px;border:1px solid var(--line);background:#11151b;color:var(--fg);cursor:pointer}
+    .filters button.active{background:linear-gradient(90deg,var(--pri),var(--pri-2));color:#0a0c10;font-weight:700;border:none}
+    .search-box{margin:0 auto 20px;max-width:460px;display:flex;gap:6px;position:relative}
+    .search-box input{flex:1;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:#0f1319;color:var(--fg)}
+    .search-box button{padding:0 14px;border-radius:12px;border:1px solid var(--line);background:#11151b;color:var(--fg);cursor:pointer}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+    .card{border:1px solid var(--line);background:linear-gradient(180deg,#0e1217,#0b0f14);border-radius:18px;overflow:hidden;display:flex;flex-direction:column}
+    .thumb{aspect-ratio:4/3;background:#0c1016;display:grid;place-items:center;border-bottom:1px solid var(--line)}
+    .thumb img{max-width:100%;max-height:100%}
+    .card-body{padding:14px}
+    .title{font-weight:700;margin:0 0 6px}
+    .muted{color:var(--muted);font-size:14px}
+    .price{margin-top:10px;font-weight:800;margin-bottom:8px}
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:#11151b;cursor:pointer;color:var(--fg)}
+    .btn.primary{background:linear-gradient(90deg,var(--pri),var(--pri-2));color:#0a0c10;font-weight:700;border:none}
+    .btn.full{width:100%}
+    .txt{width:100%;margin-bottom:8px;padding:10px;border-radius:10px;border:1px solid var(--line);background:#0f1319;color:var(--fg)}
+    .invalid{border-color:#ef4444; box-shadow:0 0 0 2px rgba(239,68,68,.25)}
+    .hint{font-size:12px; color:#c7ccd1; margin-top:4px}
+    .hint.error{color:#ef9a9a}
+    .cart-fab{position:fixed;right:20px;bottom:20px;background:linear-gradient(90deg,var(--pri),var(--pri-2));color:#0a0c10;border:none;border-radius:16px;padding:14px 16px;font-weight:800;box-shadow:0 10px 30px rgba(110,231,255,.25);cursor:pointer;z-index:20}
+    .drawer{position:fixed;inset:0;pointer-events:none}
+    .drawer.open{pointer-events:auto}
+    .drawer .shade{position:absolute;inset:0;background:rgba(0,0,0,.5);opacity:0;transition:.2s}
+    .drawer.open .shade{opacity:1}
+    .panel{position:absolute;top:0;right:-420px;width:100%;max-width:420px;height:100%;background:#0e1217;border-left:1px solid var(--line);transition:.25s;padding:18px;display:flex;flex-direction:column}
+    .drawer.open .panel{right:0}
+    .row{display:flex;align-items:center;gap:8px;justify-content:space-between}
+    .cart-items{margin-top:12px;display:flex;flex-direction:column;gap:10px;overflow:auto}
+    .ci{display:grid;grid-template-columns:56px 1fr auto;gap:10px;padding:10px;border:1px solid var(--line);border-radius:12px;background:#0f1319}
+    .ci img{width:56px;height:56px;object-fit:cover;border-radius:10px}
+    .qty{display:flex;align-items:center;gap:8px}
+    .qty button{width:28px;height:28px;border-radius:8px;border:1px solid var(--line);background:#0f1319;color:var(--fg);cursor:pointer}
+    .totals{margin-top:auto;padding-top:12px;border-top:1px dashed var(--line)}
+    dialog{border:none;border-radius:16px;background:#0e1217;color:#f4f6f8;padding:0;max-width:720px;width:92%}
+    .modal-body{padding:18px}
+    .modal-head{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--line)}
+    footer{margin-top:24px;display:flex;justify-content:space-between;align-items:center;color:#c7ccd1}
+    label{color:#c7ccd1;font-size:14px}
+    .input{display:flex;flex-direction:column;gap:6px}
+    input,select,textarea{background:#0f1319;color:var(--fg);border:1px solid var(--line);border-radius:12px;padding:10px}
+  </style>
+</head>
+<body>
+  <main class="container">
+    <section class="hero" aria-label="Store header">
+      <img src="Logo (black background).png" alt="Company Logo" class="hero-logo" data-logo/>
+      <h1 class="hero-title" id="brandTitle">Formetry</h1>
+    </section>
+
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="Search products..."/>
+      <button id="clearSearch" title="Clear">✕</button>
+    </div>
+    <div class="filters" id="filters"></div>
+
+    <h2 style="margin:10px 0 8px;font-size:20px;font-weight:800">All Products</h2>
+    <section class="grid" id="grid"></section>
+
+    <!-- Policies -->
+    <section id="policies" class="container" style="padding:28px 0 0">
+      <h2 style="margin:0 0 10px;font-size:20px;font-weight:800">Shipping & Returns</h2>
+      <div style="color:#c7ccd1;display:grid;gap:10px">
+        <details>
+          <summary style="cursor:pointer;color:#f4f6f8">Shipping</summary>
+          <div>
+            <p><strong>Collection (Free):</strong> We’ll message you when your order is ready.</p>
+            <p><strong>Courier (R60 flat to major centres):</strong> 2–5 business days after dispatch.</p>
+            <p><strong>Outlying areas (R95 flat):</strong> 3–7 business days after dispatch.</p>
+            <p><strong>Lead time:</strong> Most items are made to order. Please allow 2–5 days to print before dispatch.</p>
+            <p><strong>Colours:</strong> “Limited colours” means small batch availability—shades may vary slightly.</p>
+          </div>
+        </details>
+        <details>
+          <summary style="cursor:pointer;color:#f4f6f8">Returns & Exchanges</summary>
+          <div>
+            <p><strong>Damaged/Faulty on arrival:</strong> Contact us within 7 days with photos. We’ll repair, replace, or refund (we cover return courier if defective).</p>
+            <p><strong>Change of mind:</strong> Within 7 days, unused and in original condition—refund or exchange (return courier at customer’s cost).</p>
+            <p><strong>Customised items:</strong> Non-returnable unless faulty.</p>
+            <p><strong>Wear & tear / misuse:</strong> Not covered.</p>
+          </div>
+        </details>
+        <details>
+          <summary style="cursor:pointer;color:#f4f6f8">Warranty</summary>
+          <div>
+            <p>3-month workmanship warranty on prints (excluding normal wear and heat/impact damage).</p>
+          </div>
+        </details>
+        <details>
+          <summary style="cursor:pointer;color:#f4f6f8">Privacy</summary>
+          <div>
+            <p>We only collect details needed to fulfil orders (name, phone, address). We don’t sell or share your info. Request deletion any time at <a href="mailto:formetry3d@outlook.com">formetry3d@outlook.com</a>.</p>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <footer>
+      <div class="container" style="padding:30px 0">
+        <div style="display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between">
+          <div style="display:flex;align-items:center;gap:10px">
+            <img src="Logo (black background).png" alt="Company Logo" style="height:40px" data-logo/>
+            <div>
+              <div style="font-weight:700"><span data-brand>Formetry</span></div>
+              <div style="color:#c7ccd1">Quality 3D prints • South Africa</div>
+            </div>
+          </div>
+          <div style="color:#c7ccd1">© <span id="yr"></span> <span data-brand>Formetry</span>. All rights reserved.</div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+          <a href="https://wa.me/27791985740" target="_blank" rel="noopener" class="btn" style="text-decoration:none">💬 WhatsApp us</a>
+          <a href="mailto:formetry3d@outlook.com" class="btn" style="text-decoration:none">✉️ Email us</a>
+          <a href="#policies" class="btn" style="text-decoration:none">📄 Policies</a>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <button class="cart-fab" id="fab">🛒 View Cart (<span id="fabCount">0</span>)</button>
+
+  <!-- Cart Drawer -->
+  <div class="drawer" id="drawer" aria-hidden="true">
+    <div class="shade" data-close></div>
+    <aside class="panel" role="dialog" aria-label="Shopping cart">
+      <div class="row">
+        <h2 style="margin:0; display:flex; align-items:center; gap:8px">
+          <img src="Logo (black background).png" alt="Company Logo" style="height:40px" data-logo/> Your Cart
+        </h2>
+        <button class="btn" data-close style="color:white">Close</button>
+      </div>
+      <div id="cartItems" class="cart-items"></div>
+      <div class="totals">
+        <div class="row"><span style="color:#c7ccd1">Subtotal</span><strong id="subtotal">R0.00</strong></div>
+        <div class="row"><span style="color:#c7ccd1">Shipping</span>
+          <span>
+            <select id="ship">
+              <option value="0">Collect (Free)</option>
+              <option value="60">Courier (R60 flat)</option>
+            </select>
+          </span>
+        </div>
+        <div class="row" style="margin-top:6px;font-size:18px"><span>Total</span><strong id="total">R0.00</strong></div>
+        <button class="btn primary" id="checkoutBtn" style="margin-top:12px;width:100%">Checkout</button>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Checkout Modal -->
+  <dialog id="checkout">
+    <div class="modal-head">
+      <strong style="display:flex;align-items:center;gap:8px">
+        <img src="Logo (black background).png" alt="Company Logo" style="height:40px" data-logo/> Checkout
+      </strong>
+      <button class="btn" id="closeCheckout" style="color:white">Close</button>
+    </div>
+    <div class="modal-body">
+      <form id="coForm">
+        <div class="input"><label for="buyerName">Full name</label><input id="buyerName" required></div>
+        <div class="input"><label for="email">Email</label><input id="email" type="email" required></div>
+        <div class="input"><label for="phone">Phone (WhatsApp)</label><input id="phone" required></div>
+        <div class="input"><label for="method">Payment Method</label>
+          <select id="method" required>
+            <option value="EFT">EFT</option>
+            <option value="Pay link">Pay link</option>
+            <option value="Cash on collection">Cash on collection</option>
+          </select>
+        </div>
+        <div class="input"><label for="addr">Delivery Address (if courier)</label><textarea id="addr" rows="3"></textarea></div>
+        <div class="empty" id="summaryBox">Cart is empty.</div>
+        <div style="margin-top:14px;display:flex;gap:10px;justify-content:flex-end">
+          <button type="button" class="btn" id="copyWhatsApp">Copy WhatsApp Order</button>
+          <button type="submit" class="btn primary">Place Order</button>
+        </div>
+      </form>
+      <footer>
+        <span>🚚 Lead time: 2–5 days on most items.</span>
+        <span style="color:#c7ccd1">This is a demo checkout (no payments yet).</span>
+      </footer>
+    </div>
+  </dialog>
+
+  <script>
+  /* ---------- Helpers & Branding ---------- */
+  const ZAR = n => `R${n.toFixed(2)}`;
+  const el = s => document.querySelector(s);
+  const els = s => Array.from(document.querySelectorAll(s));
+
+  // Default WhatsApp number for orders (intl format without +)
+  const DEFAULT_WHATSAPP = '27791985740';
+
+  const BRAND = {
+    name: localStorage.getItem('brand_name') || 'Formetry',
+    logo: localStorage.getItem('brand_logo') || 'Logo (black background).png'
+  };
+  function applyBrand(){
+    document.title = `${BRAND.name} – 3D Print Shop`;
+    const bt = el('#brandTitle'); if(bt) bt.textContent = BRAND.name;
+    els('[data-brand]').forEach(n => n.textContent = BRAND.name);
+    els('img[data-logo]').forEach(img => { if(!img.src.endsWith(BRAND.logo)) img.src = BRAND.logo; });
+    const fav = el('#favicon'); if(fav) fav.href = BRAND.logo;
+  }
+  window.setBrand = (name, logo) => {
+    if(name){ localStorage.setItem('brand_name', name); BRAND.name = name; }
+    if(logo){ localStorage.setItem('brand_logo', logo); BRAND.logo = logo; }
+    applyBrand();
+  };
+
+  /* ---------- Products ---------- */
+  const PRODUCTS = [
+    { id:'custom-piggy-bank', name:'Customized Piggy Bank', price:250, cat:'custom', img:'Personalised piggy bank box.png', desc:'Get personal with your savings – add your name to the piggy bank!' },
+    { id:'yarn-bowl', name:'Yarn Bowl', price:350, cat:'hobbies', img:'Yarn bowl Upscaled to 150.png', desc:'Crochet with style AND comfort.' },
+    { id:'axolotl-articulate', name:'Axolotl Keychain', price:120, cat:'toys', img:'axolotl articulate.png', desc:"It's a keychain that can bend!" },
+    { id:'hex-drawer', name:'Hexagonal Drawer Unit', price:190, cat:'home', img:'4. Singular Hexagonal drawer.png', desc:'Buy per unit. Stackable. Available in limited colours only. Whatsapp for more information. Size: 76,5 mm in length.' },
+    { id:'honeycomb-vase', name:'Honeycomb Vase', price:200, cat:'home', img:'5. Honeycomb vase.png', desc:'Available in limited colours. Whatsapp for more information. Size: 115 mm in height.' },
+    { id:'five-hex-shelf', name:'Five-Part Honeycomb Shelf', price:340, cat:'home', img:'6. Five part honeycomb shelf.png', desc:'5 Hexagon shelf. Available in limited colours. Whatsapp for more information. Size: 241 mm in length.' }
+  ];
+
+  /* ---------- Cart State ---------- */
+  let cart = JSON.parse(localStorage.getItem('skai_cart') || '{}');
+  let currentFilter = localStorage.getItem('skai_filter') || 'all';
+  let searchTerm = (localStorage.getItem('skai_search') || '').toLowerCase();
+
+  function saveCart(){ localStorage.setItem('skai_cart', JSON.stringify(cart)); updateCounts(); }
+  function updateCounts(){ const count = Object.values(cart).reduce((a,b)=>a+b.qty,0); const c = el('#fabCount'); if(c) c.textContent = count; }
+  function lineKey(id, name){ return `${id}::${(name||'').toLowerCase()}`; }
+
+  /* ---------- Add/Remove ---------- */
+  function add(id){
+    const p = PRODUCTS.find(x => x.id === id); if(!p) return;
+    const input = el(`#nameInput-${id}`); const customName = input ? input.value.trim() : '';
+    if(id === 'custom-piggy-bank' && !customName){
+      if(input){ input.classList.add('invalid'); input.focus(); }
+      const hint = el(`#hint-nameInput-${id}`); if(hint){ hint.textContent = 'Please enter a name before adding to cart.'; hint.classList.add('error'); }
+      return;
+    }
+    const key = lineKey(id, customName);
+    const cur = cart[key] || { id, customName, qty: 0 };
+    cur.qty += 1; cur.customName = customName; cart[key] = cur;
+    saveCart(); drawCart();
+  }
+  function dec(key){
+    const line = cart[key]; if(!line) return;
+    line.qty -= 1; if(line.qty <= 0) delete cart[key];
+    saveCart(); drawCart();
+  }
+
+  /* ---------- Render Grid ---------- */
+  function render(){
+    const g = el('#grid'); if(!g) return; g.innerHTML = '';
+    const term = (searchTerm || '').toLowerCase();
+
+    PRODUCTS
+      .filter(p => currentFilter === 'all' || p.cat === currentFilter)
+      .filter(p => !term || p.name.toLowerCase().includes(term) || p.desc.toLowerCase().includes(term))
+      .forEach(p => {
+        const c = document.createElement('article'); c.className = 'card';
+        const customBlock = (p.id === 'custom-piggy-bank') ? `
+          <input class="txt" type="text" id="nameInput-${p.id}" placeholder="Enter name for piggy bank"/>
+          <div class="hint" id="hint-nameInput-${p.id}"></div>` : '';
+        c.innerHTML = `
+          <div class="thumb"><img alt="${p.name}" src="${p.img}" loading="lazy"/></div>
+          <div class="card-body">
+            <h3 class="title">${p.name}</h3>
+            <div class="muted">${p.desc}</div>
+            <div class="price">${ZAR(p.price)}</div>
+            ${customBlock}
+            <button class="btn primary full" data-add="${p.id}">Add to Cart</button>
+          </div>`;
+        g.appendChild(c);
+      });
+
+    const inp = el('#nameInput-custom-piggy-bank');
+    if(inp){
+      inp.addEventListener('input', () => {
+        const h = el('#hint-nameInput-custom-piggy-bank');
+        if(inp.value.trim()){ inp.classList.remove('invalid'); if(h){ h.textContent=''; h.classList.remove('error'); } }
+      });
+    }
+  }
+
+  /* ---------- Totals & Cart Drawer ---------- */
+  function subtotal(){ let s=0; for(const key in cart){ const line=cart[key]; const p=PRODUCTS.find(x=>x.id===line.id); if(p) s += p.price*line.qty; } return s; }
+  function updateTotals(){
+    const sub = subtotal();
+    const shipSel = el('#ship'); const ship = shipSel ? Number(shipSel.value||0) : 0;
+    const se = el('#subtotal'); const te = el('#total');
+    if(se) se.textContent = ZAR(sub);
+    if(te) te.textContent = ZAR(sub + ship);
+  }
+  function buildSummary(){
+    const box = el('#summaryBox'); if(!box) return;
+    const keys = Object.keys(cart);
+    if(!keys.length){ box.textContent = 'Cart is empty.'; return; }
+    let lines = [];
+    for(const key of keys){
+      const line = cart[key];
+      const p = PRODUCTS.find(x=>x.id===line.id); if(!p) continue;
+      const tag = line.customName ? ` (Name: ${line.customName})` : '';
+      lines.push(`${p.name}${tag} × ${line.qty} — ${ZAR(p.price*line.qty)}`);
+    }
+    const ship = el('#ship') ? Number(el('#ship').value||0) : 0;
+    const sum = subtotal();
+    box.innerHTML = `<strong>Order Summary</strong><br>${lines.join('<br>')}<br><br><em>Shipping:</em> ${ZAR(ship)}<br><em>Subtotal:</em> ${ZAR(sum)}<br><strong>Total:</strong> ${ZAR(sum+ship)}`;
+  }
+  function drawCart(){
+    const wrap = el('#cartItems'); if(!wrap) return; wrap.innerHTML='';
+    const keys = Object.keys(cart);
+    if(!keys.length){ wrap.innerHTML = `<div class="empty">Your cart is empty.</div>`; updateTotals(); buildSummary(); return; }
+    for(const key of keys){
+      const line = cart[key];
+      const p = PRODUCTS.find(x=>x.id===line.id); if(!p) continue;
+      const nameRow = line.customName ? `<div class='muted'>Name: ${line.customName}</div>` : '';
+      const row = document.createElement('div'); row.className='ci';
+      row.innerHTML = `
+        <img alt="${p.name}" src="${p.img}"/>
+        <div><div style="font-weight:700">${p.name}</div>${nameRow}<div class="muted">${ZAR(p.price)} each</div></div>
+        <div class="qty">
+          <button data-dec="${key}">-</button>
+          <div>${line.qty}</div>
+          <button data-add="${p.id}" data-addname="${line.customName||''}">+</button>
+        </div>`;
+      wrap.appendChild(row);
+    }
+    updateTotals(); buildSummary();
+  }
+
+  /* ---------- Clipboard Helpers (WhatsApp link) ---------- */
+  function sanitizeForClipboard(str){
+    return String(str||'')
+      .replace(/\r\n?/g,'\n')
+      .replace(/[\u2028\u2029]/g,'\n')
+      .replace(/\0/g,'')
+      .normalize('NFC');
+  }
+  async function copyLinkToClipboard(url){
+    try{
+      await navigator.clipboard.writeText(url);
+      alert('WhatsApp order link copied. Paste into your browser or share.');
+    }catch(err){
+      try{
+        const ta=document.createElement('textarea'); ta.value=url; document.body.appendChild(ta);
+        ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+        alert('WhatsApp order link copied (fallback).');
+      }catch(e2){
+        window.open(url,'_blank');
+        alert('We opened WhatsApp Web. If it didn\'t open, copy this link:\n'+url);
+      }
+    }
+  }
+
+  /* ---------- Events ---------- */
+  document.body.addEventListener('click', e=>{
+    const addId = e.target.getAttribute('data-add');
+    if(addId){
+      const forcedName = e.target.getAttribute('data-addname');
+      if(forcedName!=null){
+        const key = lineKey(addId, forcedName);
+        const line = cart[key] || {id:addId, customName:forcedName, qty:0};
+        line.qty += 1; cart[key] = line; saveCart(); drawCart();
+      } else { add(addId); }
+    }
+    const decKey = e.target.getAttribute('data-dec'); if(decKey){ dec(decKey); }
+    if(e.target.hasAttribute('data-close')){ const d = el('#drawer'); if(d) d.classList.remove('open'); }
+
+    // GA: add_to_cart
+    if(addId && typeof gtag==='function'){
+      const p = PRODUCTS.find(x=>x.id===addId);
+      gtag('event','add_to_cart',{ item_id:addId, item_name:p?.name, value:p?.price, currency:'ZAR' });
+    }
+  });
+
+  const fab = el('#fab'); if(fab) fab.onclick = ()=>{ const d = el('#drawer'); if(d){ d.classList.add('open'); drawCart(); } };
+  const shipSel = el('#ship'); if(shipSel) shipSel.onchange = ()=>{ updateTotals(); buildSummary(); };
+
+  const dialog = el('#checkout');
+  const checkoutBtn = el('#checkoutBtn');
+  if(checkoutBtn) checkoutBtn.onclick = ()=>{
+    if(!Object.keys(cart).length) return alert('Your cart is empty.');
+    if(dialog && dialog.showModal) dialog.showModal();
+    if(typeof gtag==='function'){ gtag('event','begin_checkout'); }
+    buildSummary();
+  };
+  const closeCheckout = el('#closeCheckout'); if(closeCheckout) closeCheckout.onclick = ()=> dialog && dialog.close();
+
+  const copyWA = el('#copyWhatsApp'); if(copyWA) copyWA.onclick = ()=>{
+    const items = Object.keys(cart).map(key=>{
+      const line = cart[key]; const p = PRODUCTS.find(x=>x.id===line.id); if(!p) return null;
+      const tag = line.customName ? ` (Name: ${line.customName})` : '';
+      return `${p.name}${tag} x ${line.qty}`;
+    }).filter(Boolean);
+
+    const phone = el('#phone') ? el('#phone').value.trim() : '';
+    const addr  = el('#addr')  ? el('#addr').value.trim()  : '';
+    const method= el('#method')? el('#method').value      : 'EFT';
+    const name  = el('#buyerName')? el('#buyerName').value.trim() : '';
+    const ship  = el('#ship') ? Number(el('#ship').value||0) : 0;
+    const total = el('#total') ? el('#total').textContent : 'R0.00';
+
+    const lines = [
+      `Hi, this is ${name||'a customer'}. I'd like to order:`,
+      ...items.map(i=>`- ${i}`),
+      `Shipping: ${ship>0?`Courier (R${ship})`:'Collection'}`,
+      `Payment: ${method}`,
+      `Address: ${addr||'-'}`,
+      `Total: ${total}`
+    ];
+    const msgText = sanitizeForClipboard(lines.join('\n'));
+    const typed = (phone||'').replace(/[^0-9]/g,'');
+    const target = typed || DEFAULT_WHATSAPP; // use customer-provided phone OR your business number
+    const waUrl = `https://wa.me/${target}?text=${encodeURIComponent(msgText)}`;
+    if(typeof gtag==='function'){ gtag('event','generate_whatsapp_order_link'); }
+    copyLinkToClipboard(waUrl);
+  };
+
+  /* ---------- Filters & Search ---------- */
+  function buildFilters(){
+    const f = el('#filters'); if(!f) return; f.innerHTML='';
+    const cats = ['all', ...new Set(PRODUCTS.map(p=>p.cat))];
+    cats.forEach(cat=>{
+      const b = document.createElement('button');
+      b.textContent = cat.charAt(0).toUpperCase()+cat.slice(1);
+      if(cat===currentFilter) b.classList.add('active');
+      b.onclick = ()=>{ currentFilter=cat; localStorage.setItem('skai_filter', currentFilter); buildFilters(); render(); };
+      f.appendChild(b);
+    });
+  }
+
+  const searchInput = el('#searchInput');
+  const clearBtn = el('#clearSearch');
+  function updateClearBtn(){ if(clearBtn) clearBtn.style.display = (searchInput && searchInput.value.trim().length) ? 'inline-block' : 'none'; }
+  if(searchInput){
+    const saved = localStorage.getItem('skai_search') || '';
+    searchInput.value = saved;
+    searchTerm = (saved||'').trim().toLowerCase();
+    updateClearBtn();
+    searchInput.addEventListener('input', ()=>{
+      searchTerm = searchInput.value.trim().toLowerCase();
+      localStorage.setItem('skai_search', searchInput.value);
+      updateClearBtn();
+      render();
+    });
+  }
+  if(clearBtn && searchInput){
+    clearBtn.addEventListener('click', ()=>{
+      searchInput.value=''; searchTerm='';
+      localStorage.removeItem('skai_search');
+      updateClearBtn(); render(); searchInput.focus();
+    });
+  }
+
+  /* ---------- Init ---------- */
+  const yr = el('#yr'); if(yr) yr.textContent = new Date().getFullYear();
+  applyBrand();
+  buildFilters();
+  render();        // renders ALL products immediately
+  updateCounts();
+  drawCart();
+  </script>
+</body>
+</html>
