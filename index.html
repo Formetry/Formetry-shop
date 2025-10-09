@@ -409,13 +409,67 @@
     if (!window.YocoSDK) return alert('Yoco SDK not loaded.');
     const yoco = new window.YocoSDK({ publicKey: YOCO_PUBLIC_KEY });
 
-    const { error: openErr, result: tokenResult } = await yoco.showPopup({
-      amountInCents: Math.round(total * 100),
-      currency: 'ZAR',
-      name: 'Formetry',
-      description: `Order for ${name}`,
-      customer: { email }
-    });
+    // --- Improved Yoco popup with logging ---
+console.log('YocoSDK loaded?', typeof window.YocoSDK);
+console.log('Using public key:', YOCO_PUBLIC_KEY);
+
+yoco.showPopup({
+  amountInCents: Math.round(total * 100),
+  currency: 'ZAR',
+  name: 'Formetry',
+  description: `Order for ${name}`,
+  customer: { email },
+  callback: async (result) => {
+    console.log('Yoco popup result:', result);
+
+    if (result.error) {
+      console.error('Yoco token error object:', result.error);
+      alert(`Yoco error: ${result.error.message || 'Could not create payment token'}`);
+      return;
+    }
+
+    if (!result.id) {
+      console.error('No token returned from Yoco:', result);
+      alert('Could not create payment token (no token ID).');
+      return;
+    }
+
+    const token = result.id;
+    console.log('✅ Token created successfully:', token);
+
+    // Continue with your fetch request to Netlify
+    try {
+      const res = await fetch('/.netlify/functions/yoco-charge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token,
+          amountInCents: Math.round(total * 100),
+          currency: 'ZAR',
+          description: `Formetry order for ${name}`,
+          customer: { name, email, phone },
+          shippingAddress: addr,
+          cart,
+        }),
+      });
+
+      const data = await res.json();
+      console.log('Charge response:', data);
+
+      if (!res.ok || !data.ok) {
+        console.error('Charge error:', data);
+        alert('Payment failed: ' + (data.message || 'Please try another card.'));
+        return;
+      }
+
+      alert('✅ Payment successful!');
+    } catch (err) {
+      console.error('Network or fetch error:', err);
+      alert('Payment error. Please check your internet connection or try again.');
+    }
+  }
+});
+
 
     if (openErr) {
       console.error(openErr);
@@ -536,3 +590,4 @@
   </script>
 </body>
 </html>
+
