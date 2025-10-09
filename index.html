@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,8 +18,8 @@
   <!-- Yoco Web SDK -->
   <script src="https://js.yoco.com/sdk/v1/yoco-sdk-web.js"></script>
   <script>
-    // TODO: replace with your real Yoco public key (starts with pk_…)
-    const YOCO_PUBLIC_KEY = "pk_test_your_public_key_here";
+    // Your live public key (safe to be public)
+    const YOCO_PUBLIC_KEY = "pk_live_6a754a5b9AO2rL062bf4";
   </script>
 
   <link rel="icon" id="favicon" href="Logo (black background).png">
@@ -112,7 +113,7 @@
     <section id="policies" class="container" style="padding:28px 0 0">
       <h2 style="margin:0 0 10px;font-size:20px;font-weight:800">Shipping & Returns</h2>
       <div style="color:#c7ccd1;display:grid;gap:10px">
-        <details>
+        <details open>
           <summary style="cursor:pointer;color:#f4f6f8">Shipping</summary>
           <div>
             <p><strong>Standard Courier (R100 flat):</strong> 2–5 business days after dispatch.</p>
@@ -124,6 +125,7 @@
           <summary style="cursor:pointer;color:#f4f6f8">Returns & Exchanges</summary>
           <div>
             <p><strong>Damaged/Faulty on arrival:</strong> Contact us within 7 days with photos. We’ll repair, replace, or refund (we cover return courier if defective).</p>
+            <p><strong>Change of mind:</strong> Within 7 days, unused and in original condition—refund or exchange (return courier at customer’s cost).</p>
             <p><strong>Customised items:</strong> Non-returnable unless faulty.</p>
             <p><strong>Wear & tear / misuse:</strong> Not covered.</p>
           </div>
@@ -154,11 +156,6 @@
             </div>
           </div>
           <div style="color:#c7ccd1">© <span id="yr"></span> <span data-brand>Formetry</span>. All rights reserved.</div>
-        </div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
-          <a href="https://wa.me/27791987540" target="_blank" rel="noopener" class="btn" style="text-decoration:none">💬 WhatsApp us</a>
-          <a href="mailto:formetry3d@outlook.com" class="btn" style="text-decoration:none">✉️ Email us</a>
-          <a href="#policies" class="btn" style="text-decoration:none">📄 Policies</a>
         </div>
       </div>
     </footer>
@@ -239,8 +236,6 @@
   const el = s => document.querySelector(s);
   const els = s => Array.from(document.querySelectorAll(s));
 
-  const DEFAULT_WHATSAPP = '27791987540'; // not used for checkout anymore but kept for future
-
   const BRAND = {
     name: localStorage.getItem('brand_name') || 'Formetry',
     logo: localStorage.getItem('brand_logo') || 'Logo (black background).png'
@@ -252,13 +247,8 @@
     els('img[data-logo]').forEach(img => { if(!img.src.endsWith(BRAND.logo)) img.src = BRAND.logo; });
     const fav = el('#favicon'); if(fav) fav.href = BRAND.logo;
   }
-  window.setBrand = (name, logo) => {
-    if(name){ localStorage.setItem('brand_name', name); BRAND.name = name; }
-    if(logo){ localStorage.setItem('brand_logo', logo); BRAND.logo = logo; }
-    applyBrand();
-  };
 
-  /* ---------- Products (from your original list) ---------- */
+  /* ---------- Products (your original list) ---------- */
   const PRODUCTS = [
     { id:'custom-piggy-bank',   name:'Customized Piggy Bank',       price:250, cat:'custom',  img:'Personalised piggy bank box.png',       desc:'Get personal with your savings – add your name to the piggy bank!' },
     { id:'yarn-bowl',           name:'Yarn Bowl',                    price:350, cat:'hobbies', img:'Yarn bowl Upscaled to 150.png',         desc:'Crochet with style AND comfort.' },
@@ -546,4 +536,3 @@
   </script>
 </body>
 </html>
-
