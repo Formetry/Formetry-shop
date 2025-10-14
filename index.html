@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,12 +17,11 @@
   <!-- Yoco Web SDK -->
   <script src="https://js.yoco.com/sdk/v1/yoco-sdk-web.js"></script>
   <script>
-    // Your live public key (safe to be public)
+    /* ✅ Your live public key */
     const YOCO_PUBLIC_KEY = "pk_live_6a754a5b9AO2rL062bf4";
   </script>
 
   <link rel="icon" id="favicon" href="Logo (black background).png">
-
   <style>
     :root{ --bg:#0b0d10; --fg:#f4f6f8; --muted:#c7ccd1; --pri:#6ee7ff; --pri-2:#8b5cf6; --line:#20242c; }
     *{box-sizing:border-box}
@@ -40,25 +38,8 @@
     .search-box button{padding:0 14px;border-radius:12px;border:1px solid var(--line);background:#11151b;color:var(--fg);cursor:pointer}
     .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
     .card{border:1px solid var(--line);background:linear-gradient(180deg,#0e1217,#0b0f14);border-radius:18px;overflow:hidden;display:flex;flex-direction:column}
-
-    /* Fixed CSS for product thumbs */
-    .thumb{
-      aspect-ratio: 4 / 3;
-      background:#0c1016;
-      border-bottom:1px solid var(--line);
-      position: relative;
-      overflow: hidden;
-      display: grid;
-      place-items: center;
-    }
-    .thumb img{
-      width: 100%;
-      height: 100%;
-      display: block;
-      object-fit: cover;
-      object-position: center;
-    }
-
+    .thumb{aspect-ratio:4/3;background:#0c1016;border-bottom:1px solid var(--line);position:relative;overflow:hidden;display:grid;place-items:center;cursor:zoom-in}
+    .thumb img{width:100%;height:100%;object-fit:cover;display:block}
     .card-body{padding:14px}
     .title{font-weight:700;margin:0 0 6px}
     .muted{color:var(--muted);font-size:14px}
@@ -66,16 +47,16 @@
     .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:#11151b;cursor:pointer;color:var(--fg)}
     .btn.primary{background:linear-gradient(90deg,var(--pri),var(--pri-2));color:#0a0c10;font-weight:700;border:none}
     .btn.full{width:100%}
-    .txt{width:100%;margin-bottom:8px;padding:10px;border-radius:10px;border:1px solid var(--line);background:#0f1319;color:var(--fg)}
-    .invalid{border-color:#ef4444; box-shadow:0 0 0 2px rgba(239,68,68,.25)}
-    .hint{font-size:12px; color:#c7ccd1; margin-top:4px}
+    .txt{width:100%;margin-bottom:8px;padding:10px;border-radius:10px;border:1px solid var(--line);background:#0f1319;color:#fff}
+    .invalid{border-color:#ef4444;box-shadow:0 0 0 2px rgba(239,68,68,.25)}
+    .hint{font-size:12px;color:#c7ccd1;margin-top:4px}
     .hint.error{color:#ef9a9a}
     .cart-fab{position:fixed;right:20px;bottom:20px;background:linear-gradient(90deg,var(--pri),var(--pri-2));color:#0a0c10;border:none;border-radius:16px;padding:14px 16px;font-weight:800;box-shadow:0 10px 30px rgba(110,231,255,.25);cursor:pointer;z-index:20}
     .drawer{position:fixed;inset:0;pointer-events:none}
     .drawer.open{pointer-events:auto}
     .drawer .shade{position:absolute;inset:0;background:rgba(0,0,0,.5);opacity:0;transition:.2s}
     .drawer.open .shade{opacity:1}
-    .panel{position:absolute;top:0;right:-420px;width:100%;max-width:420px;height:100%;background:#0e1217;border-left:1px solid var(--line);transition:.25s;padding:18px;display:flex;flex-direction:column}
+    .panel{position:absolute;top:0;right:-420px;width:100%;max-width:420px;height:100%;background:#0e1217;border-left:1px solid var(--line);transition:.25s;padding:18px;display:flex;flex-direction:column;z-index:30}
     .drawer.open .panel{right:0}
     .row{display:flex;align-items:center;gap:8px;justify-content:space-between}
     .cart-items{margin-top:12px;display:flex;flex-direction:column;gap:10px;overflow:auto}
@@ -89,10 +70,25 @@
     .modal-head{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--line)}
     footer{margin-top:24px;display:flex;justify-content:space-between;align-items:center;color:#c7ccd1}
     label{color:#c7ccd1;font-size:14px}
-    .input{display:flex;flex-direction:column;gap:6px}
-    input,select,textarea{background:#0f1319;color:#fff;border:1px solid var(--line);border-radius:12px;padding:10px}
+
+    /* ✅ Readable input text + autofill fix */
+    input, select, textarea { background:#0f1319; color:#fff !important; border:1px solid var(--line); border-radius:12px; padding:10px; caret-color:#fff; }
+    input::placeholder, textarea::placeholder { color:#aaa !important; opacity:1; }
+    input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill {
+      -webkit-text-fill-color:#fff !important;
+      box-shadow:0 0 0 1000px #0f1319 inset !important;
+      transition:background-color 5000s ease-in-out 0s;
+    }
+
+    /* Image lightbox */
+    #imgLightbox::backdrop{background:rgba(0,0,0,.7)}
+    #imgLightbox img{max-width:90vw;max-height:80vh;display:block;border-radius:12px}
+
+    /* Yoco popup fix (always on top) */
+    #yoco-widget-modal-container, .yoco-widget-overlay, [id^="yoco-widget"], [class*="yoco"] { z-index:999999 !important; position:relative; }
   </style>
 </head>
+
 <body>
   <main class="container">
     <section class="hero" aria-label="Store header">
@@ -113,10 +109,10 @@
     <section id="policies" class="container" style="padding:28px 0 0">
       <h2 style="margin:0 0 10px;font-size:20px;font-weight:800">Shipping & Returns</h2>
       <div style="color:#c7ccd1;display:grid;gap:10px">
-        <details open>
+        <details>
           <summary style="cursor:pointer;color:#f4f6f8">Shipping</summary>
           <div>
-            <p><strong>Standard Courier (R100 flat):</strong> 2–5 business days after dispatch.</p>
+            <p><strong>Courier (R100 flat):</strong> 2–5 business days after dispatch. <strong>FREE over R1000</strong>.</p>
             <p><strong>Lead time:</strong> Most items are made to order. Please allow 2–5 days to print before dispatch.</p>
             <p><strong>Colours:</strong> “Limited colours” means small batch availability—shades may vary slightly.</p>
           </div>
@@ -157,6 +153,11 @@
           </div>
           <div style="color:#c7ccd1">© <span id="yr"></span> <span data-brand>Formetry</span>. All rights reserved.</div>
         </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+          <a href="https://wa.me/27791987540" target="_blank" rel="noopener" class="btn" style="text-decoration:none">💬 WhatsApp us</a>
+          <a href="mailto:formetry3d@outlook.com" class="btn" style="text-decoration:none">✉️ Email us</a>
+          <a href="#policies" class="btn" style="text-decoration:none">📄 Policies</a>
+        </div>
       </div>
     </footer>
   </main>
@@ -176,12 +177,9 @@
       <div id="cartItems" class="cart-items"></div>
       <div class="totals">
         <div class="row"><span style="color:#c7ccd1">Subtotal</span><strong id="subtotal">R0.00</strong></div>
-        <div class="row"><span style="color:#c7ccd1">Standard Courier</span>
-          <span>
-            <select id="ship">
-              <option value="100">Standard Courier (R100 flat)</option>
-            </select>
-          </span>
+        <div class="row" id="shipRow">
+          <span style="color:#c7ccd1" id="shipLabel">Shipping</span>
+          <strong id="shipAmount">R0.00</strong>
         </div>
         <div class="row" style="margin-top:6px;font-size:18px"><span>Total</span><strong id="total">R0.00</strong></div>
         <button class="btn primary" id="checkoutBtn" style="margin-top:12px;width:100%">Checkout</button>
@@ -202,10 +200,10 @@
         <div class="input"><label for="buyerName">Full name</label><input id="buyerName" required></div>
         <div class="input"><label for="email">Email</label><input id="email" type="email" required></div>
         <div class="input"><label for="phone">Phone (WhatsApp)</label><input id="phone" required></div>
-        <div class="input"><label for="addr">Delivery Address</label><textarea id="addr" rows="3" placeholder="Street, suburb, city, postal code" required></textarea></div>
+        <div class="input"><label for="addr">Delivery Address (street, suburb, city, postal code)</label><textarea id="addr" rows="3"></textarea></div>
         <div class="empty" id="summaryBox">Cart is empty.</div>
         <div style="margin-top:14px;display:flex;gap:10px;justify-content:flex-end">
-          <button type="submit" class="btn primary">Pay Securely with Card</button>
+          <button type="submit" class="btn primary" id="payYoco">Pay Securely with Card</button>
         </div>
       </form>
       <footer>
@@ -215,47 +213,47 @@
     </div>
   </dialog>
 
-  <!-- Hidden Netlify Form to store orders privately -->
-  <form name="orders" data-netlify="true" netlify-honeypot="bot-field" hidden>
-    <input type="text"   name="customer_name">
-    <input type="email"  name="customer_email">
-    <input type="text"   name="customer_phone">
-    <textarea name="delivery_address"></textarea>
-    <input type="text"   name="shipping_method">
-    <input type="text"   name="cart_json">
-    <input type="text"   name="subtotal">
-    <input type="text"   name="shipping_cost">
-    <input type="text"   name="total">
-    <input type="text"   name="payment_status">
-    <input type="text"   name="yoco_charge_id">
-  </form>
+  <!-- Image Lightbox -->
+  <dialog id="imgLightbox">
+    <img id="lightboxImg" alt="Preview"/>
+  </dialog>
 
   <script>
   /* ---------- Helpers & Branding ---------- */
   const ZAR = n => `R${n.toFixed(2)}`;
   const el = s => document.querySelector(s);
   const els = s => Array.from(document.querySelectorAll(s));
+  const FREE_SHIP_THRESHOLD = 1000;
+  const FLAT_SHIP = 100;
 
-  const BRAND = {
-    name: localStorage.getItem('brand_name') || 'Formetry',
-    logo: localStorage.getItem('brand_logo') || 'Logo (black background).png'
-  };
+  const BRAND = { name: 'Formetry', logo: 'Logo (black background).png' };
   function applyBrand(){
     document.title = `${BRAND.name} – 3D Print Shop`;
     const bt = el('#brandTitle'); if(bt) bt.textContent = BRAND.name;
     els('[data-brand]').forEach(n => n.textContent = BRAND.name);
-    els('img[data-logo]').forEach(img => { if(!img.src.endsWith(BRAND.logo)) img.src = BRAND.logo; });
+    els('img[data-logo]').forEach(img => { img.src = BRAND.logo; });
     const fav = el('#favicon'); if(fav) fav.href = BRAND.logo;
   }
 
-  /* ---------- Products (your original list) ---------- */
+  /* ---------- Products ---------- */
   const PRODUCTS = [
-    { id:'custom-piggy-bank',   name:'Customized Piggy Bank',       price:250, cat:'custom',  img:'Personalised piggy bank box.png',       desc:'Get personal with your savings – add your name to the piggy bank!' },
-    { id:'yarn-bowl',           name:'Yarn Bowl',                    price:350, cat:'hobbies', img:'Yarn bowl Upscaled to 150.png',         desc:'Crochet with style AND comfort.' },
-    { id:'axolotl-articulate',  name:'Axolotl Keychain',             price:120, cat:'toys',    img:'axolotl articulate.png',               desc:"It's a keychain that can bend!" },
-    { id:'hex-drawer',          name:'Hexagonal Drawer Unit',        price:190, cat:'home',    img:'4. Singular Hexagonal drawer.png',     desc:'Buy per unit. Stackable. Available in limited colours only. Whatsapp for more information. Size: 76,5 mm in length.' },
-    { id:'honeycomb-vase',      name:'Honeycomb Vase',               price:200, cat:'home',    img:'5. Honeycomb vase.png',                desc:'Available in limited colours. Whatsapp for more information. Size: 115 mm in height.' },
-    { id:'five-hex-shelf',      name:'Five-Part Honeycomb Shelf',    price:340, cat:'home',    img:'6. Five part honeycomb shelf.png',     desc:'5 Hexagon shelf. Available in limited colours. Whatsapp for more information. Size: 241 mm in length.' }
+    { id:'custom-piggy-bank', name:'Customized Piggy Bank', price:250, cat:'custom', img:'Personalised piggy bank box.png', desc:'Get personal with your savings – add your name to the piggy bank!' },
+    { id:'yarn-bowl', name:'Yarn Bowl', price:350, cat:'hobbies', img:'Yarn bowl Upscaled to 150.png', desc:'Crochet with style AND comfort.' },
+    { id:'axolotl-articulate', name:'Axolotl Keychain', price:120, cat:'toys', img:'axolotl articulate.png', desc:"It's a keychain that can bend!" },
+    { id:'hex-drawer', name:'Hexagonal Drawer Unit', price:190, cat:'home', img:'4. Singular Hexagonal drawer.png', desc:'Buy per unit. Stackable. Available in limited colours only. Whatsapp for more information. Size: 76,5 mm in length.' },
+    { id:'honeycomb-vase', name:'Honeycomb Vase', price:200, cat:'home', img:'5. Honeycomb vase.png', desc:'Available in limited colours. Whatsapp for more information. Size: 115 mm in height.' },
+    { id:'five-hex-shelf', name:'Five-Part Honeycomb Shelf', price:340, cat:'home', img:'6. Five part honeycomb shelf.png', desc:'5 Hexagon shelf. Available in limited colours. Whatsapp for more information. Size: 241 mm in length.' },
+
+    /* New wall art */
+    { id:'wall-cat', name:'3D wall art - Cat', price:180, cat:'home', img:'7. 3D wall art - cat.png', desc:'Width: 156mm Length: 270mm' },
+    { id:'wall-deer', name:'3D wall art - Deer', price:180, cat:'home', img:'7. 3D wall art - Deer.png', desc:'Width: 156mm Length: 270mm' },
+    { id:'wall-eagle', name:'3D wall art - Eagle', price:180, cat:'home', img:'7. 3D wall art - Eagle.png', desc:'Width: 231mm Length: 246mm' },
+    { id:'wall-elephant', name:'3D wall art - Elephant', price:180, cat:'home', img:'7. 3D wall art - Elephant.png', desc:'Width: 243mm Length: 253mm' },
+    { id:'wall-fox', name:'3D wall art - Fox', price:180, cat:'home', img:'7. 3D wall art - Fox.png', desc:'Width: 261mm Length: 266mm' },
+    { id:'wall-iron', name:'3D wall art - Ironman', price:180, cat:'home', img:'7. 3D wall art - Iron Man.png', desc:'Width: 161mm Length: 256mm' },
+    { id:'wall-lion', name:'3D wall art - Lion', price:180, cat:'home', img:'7. 3D wall art - Lion.png', desc:'Width: 250mm Length: 200mm' },
+    { id:'wall-panda', name:'3D wall art - Panda', price:180, cat:'home', img:'7. 3D wall art - Panda.png', desc:'Width: 288mm Length: 168mm' },
+    { id:'wall-wolf', name:'3D wall art - Wolf', price:180, cat:'home', img:'7. 3D wall art - Wolf.png', desc:'Width: 190mm Length: 264mm' },
   ];
 
   /* ---------- Cart State ---------- */
@@ -301,7 +299,7 @@
           <input class="txt" type="text" id="nameInput-${p.id}" placeholder="Enter name for piggy bank"/>
           <div class="hint" id="hint-nameInput-${p.id}"></div>` : '';
         c.innerHTML = `
-          <div class="thumb"><img alt="${p.name}" src="${p.img}" loading="lazy"/></div>
+          <div class="thumb" data-zoom="${p.img}"><img alt="${p.name}" src="${p.img}" loading="lazy"/></div>
           <div class="card-body">
             <h3 class="title">${p.name}</h3>
             <div class="muted">${p.desc}</div>
@@ -322,12 +320,23 @@
   }
 
   /* ---------- Totals & Cart Drawer ---------- */
-  function findProduct(id){ return PRODUCTS.find(p=>p.id===id); }
-  function subtotal(){ let s=0; for(const key in cart){ const line=cart[key]; const p=findProduct(line.id); if(p) s += p.price*line.qty; } return s; }
+  function subtotal(){ let s=0; for(const key in cart){ const line=cart[key]; const p=PRODUCTS.find(x=>x.id===line.id); if(p) s += p.price*line.qty; } return s; }
+  function shippingFor(sub){ return sub >= FREE_SHIP_THRESHOLD ? 0 : (sub>0?FLAT_SHIP:0); }
   function updateTotals(){
     const sub = subtotal();
-    const shipSel = el('#ship'); const ship = shipSel ? Number(shipSel.value||0) : 0;
+    const ship = shippingFor(sub);
     const se = el('#subtotal'); const te = el('#total');
+    const sl = el('#shipLabel'); const sa = el('#shipAmount'); const sr = el('#shipRow');
+
+    if(sl && sa && sr){
+      if(sub===0){ sr.style.display='none'; }
+      else{
+        sr.style.display='flex';
+        if(ship===0){ sl.textContent = `Shipping (FREE over R${FREE_SHIP_THRESHOLD})`; sa.textContent = 'R0.00'; }
+        else{ sl.textContent = 'Shipping (Standard Courier)'; sa.textContent = ZAR(ship); }
+      }
+    }
+
     if(se) se.textContent = ZAR(sub);
     if(te) te.textContent = ZAR(sub + ship);
   }
@@ -338,13 +347,13 @@
     let lines = [];
     for(const key of keys){
       const line = cart[key];
-      const p = findProduct(line.id); if(!p) continue;
+      const p = PRODUCTS.find(x=>x.id===line.id); if(!p) continue;
       const tag = line.customName ? ` (Name: ${line.customName})` : '';
       lines.push(`${p.name}${tag} × ${line.qty} — ${ZAR(p.price*line.qty)}`);
     }
-    const ship = el('#ship') ? Number(el('#ship').value||0) : 0;
     const sum = subtotal();
-    box.innerHTML = `<strong>Order Summary</strong><br>${lines.join('<br>')}<br><br><em>Standard Courier:</em> ${ZAR(ship)}<br><em>Subtotal:</em> ${ZAR(sum)}<br><strong>Total:</strong> ${ZAR(sum+ship)}`;
+    const ship = shippingFor(sum);
+    box.innerHTML = `<strong>Order Summary</strong><br>${lines.join('<br>')}<br><br><em>Shipping:</em> ${ZAR(ship)}${sum>=FREE_SHIP_THRESHOLD?' (FREE)':''}<br><em>Subtotal:</em> ${ZAR(sum)}<br><strong>Total:</strong> ${ZAR(sum+ship)}`;
   }
   function drawCart(){
     const wrap = el('#cartItems'); if(!wrap) return; wrap.innerHTML='';
@@ -352,7 +361,7 @@
     if(!keys.length){ wrap.innerHTML = `<div class="empty">Your cart is empty.</div>`; updateTotals(); buildSummary(); return; }
     for(const key of keys){
       const line = cart[key];
-      const p = findProduct(line.id); if(!p) continue;
+      const p = PRODUCTS.find(x=>x.id===line.id); if(!p) continue;
       const nameRow = line.customName ? `<div class='muted'>Name: ${line.customName}</div>` : '';
       const row = document.createElement('div'); row.className='ci';
       row.innerHTML = `
@@ -383,106 +392,63 @@
     if(e.target.hasAttribute('data-close')){ const d = el('#drawer'); if(d) d.classList.remove('open'); }
   });
 
+  /* Lightbox for images */
+  document.addEventListener('click', (ev)=>{
+    const target = ev.target.closest('.thumb');
+    if(!target) return;
+    const src = target.getAttribute('data-zoom');
+    const dlg = el('#imgLightbox'); const img = el('#lightboxImg');
+    if(dlg && img){ img.src = src; dlg.showModal(); }
+  });
+  el('#imgLightbox')?.addEventListener('click', e => e.currentTarget.close());
+
   const fab = el('#fab'); if(fab) fab.onclick = ()=>{ const d = el('#drawer'); if(d){ d.classList.add('open'); drawCart(); } };
-  const shipSel = el('#ship'); if(shipSel) shipSel.onchange = ()=>{ updateTotals(); buildSummary(); };
-
   const dialog = el('#checkout');
-  const coForm = el('#coForm');
+  const checkoutBtn = el('#checkoutBtn');
+  if(checkoutBtn) checkoutBtn.onclick = ()=>{
+    if(!Object.keys(cart).length) return alert('Your cart is empty.');
+    if(dialog && dialog.showModal) dialog.showModal();
+    buildSummary();
+  };
+  const closeCheckout = el('#closeCheckout'); if(closeCheckout) closeCheckout.onclick = ()=> dialog && dialog.close();
 
-  // Replace default submit with Yoco payment flow
-  if (coForm) coForm.addEventListener('submit', async (ev) => {
-    ev.preventDefault();
+  /* ---------- Yoco Payment ---------- */
+  async function payWithYoco(evt){
+    evt.preventDefault();
+    if(!Object.keys(cart).length) return alert('Your cart is empty.');
 
-    if (!Object.keys(cart).length) return alert('Your cart is empty.');
+    const name  = el('#buyerName').value.trim();
+    const email = el('#email').value.trim();
+    const phone = el('#phone').value.trim();
+    const addr  = el('#addr').value.trim();
 
-    const name  = el('#buyerName')?.value.trim();
-    const email = el('#email')?.value.trim();
-    const phone = el('#phone')?.value.trim();
-    const addr  = el('#addr')?.value.trim();
+    if(!name || !email || !phone) return alert('Please fill in your name, email and phone.');
 
-    if (!name || !email || !addr) return alert('Please fill in your name, email, and delivery address.');
+    const sum = subtotal();
+    const ship = shippingFor(sum);
+    const total = sum + ship;
 
-    const sub  = subtotal();
-    const ship = Number(el('#ship')?.value || 0);
-    const total = sub + ship;
-
-    if (!window.YocoSDK) return alert('Yoco SDK not loaded.');
     const yoco = new window.YocoSDK({ publicKey: YOCO_PUBLIC_KEY });
+    const { error: openErr, result: tokenResult } = await yoco.showPopup({
+      amountInCents: Math.round(total * 100),
+      currency: 'ZAR',
+      name: 'Formetry',
+      description: `Order for ${name}`,
+      customer: { email }
+    });
 
-    // --- Improved Yoco popup with logging ---
-console.log('YocoSDK loaded?', typeof window.YocoSDK);
-console.log('Using public key:', YOCO_PUBLIC_KEY);
-
-yoco.showPopup({
-  amountInCents: Math.round(total * 100),
-  currency: 'ZAR',
-  name: 'Formetry',
-  description: `Order for ${name}`,
-  customer: { email },
-  callback: async (result) => {
-    console.log('Yoco popup result:', result);
-
-    if (result.error) {
-      console.error('Yoco token error object:', result.error);
-      alert(`Yoco error: ${result.error.message || 'Could not create payment token'}`);
-      return;
-    }
-
-    if (!result.id) {
-      console.error('No token returned from Yoco:', result);
-      alert('Could not create payment token (no token ID).');
-      return;
-    }
-
-    const token = result.id;
-    console.log('✅ Token created successfully:', token);
-
-    // Continue with your fetch request to Netlify
-    try {
-      const res = await fetch('/.netlify/functions/yoco-charge', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          token,
-          amountInCents: Math.round(total * 100),
-          currency: 'ZAR',
-          description: `Formetry order for ${name}`,
-          customer: { name, email, phone },
-          shippingAddress: addr,
-          cart,
-        }),
-      });
-
-      const data = await res.json();
-      console.log('Charge response:', data);
-
-      if (!res.ok || !data.ok) {
-        console.error('Charge error:', data);
-        alert('Payment failed: ' + (data.message || 'Please try another card.'));
-        return;
-      }
-
-      alert('✅ Payment successful!');
-    } catch (err) {
-      console.error('Network or fetch error:', err);
-      alert('Payment error. Please check your internet connection or try again.');
-    }
-  }
-});
-
-
-    if (openErr) {
+    if (openErr){
       console.error(openErr);
       return alert('Payment popup was closed or failed to open.');
     }
-    if (!tokenResult || !tokenResult.id) {
+    if(!tokenResult || !tokenResult.id){
       return alert('Could not create payment token. Please try again.');
     }
 
-    try {
+    try{
       const res = await fetch('/.netlify/functions/yoco-charge', {
         method: 'POST',
-        headers: { 'Content-Type':'application/json' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           token: tokenResult.id,
           amountInCents: Math.round(total * 100),
@@ -490,50 +456,41 @@ yoco.showPopup({
           description: `Formetry order for ${name}`,
           customer: { name, email, phone },
           shippingAddress: addr,
-          cart
+          cart: Object.keys(cart).map(k=>({ key:k, ...cart[k] }))
         })
       });
       const data = await res.json();
-      if (!res.ok || data.error) {
+      if(!res.ok || !data.ok){
         console.error('Charge error:', data);
         return alert('Payment failed: ' + (data.message || 'Please try another card.'));
       }
-
-      // Save order privately to Netlify Forms
-      await saveOrderToNetlifyForms({
-        customer_name: name,
-        customer_email: email,
-        customer_phone: phone,
-        delivery_address: addr,
-        shipping_method: `Standard Courier (R${ship})`,
-        cart_json: JSON.stringify(cart),
-        subtotal: `R${sub.toFixed(2)}`,
-        shipping_cost: `R${ship.toFixed(2)}`,
-        total: `R${total.toFixed(2)}`,
-        payment_status: 'paid',
-        yoco_charge_id: data.chargeId || ''
-      });
-
-      // Clear cart & confirm
-      cart = {};
-      localStorage.setItem('skai_cart','{}');
-      updateCounts(); drawCart();
-      alert('Payment successful! Thank you. We\'ve received your order.');
-      dialog?.close();
-    } catch (err) {
+    }catch(err){
       console.error(err);
-      alert('Something went wrong completing your payment. Please try again.');
+      return alert('Payment failed. Please try again.');
     }
-  });
 
-  // helper: submit Netlify Form programmatically
-  async function saveOrderToNetlifyForms(fields) {
-    const form = document.querySelector('form[name="orders"]');
-    const fd = new FormData(form);
-    Object.entries(fields).forEach(([k,v]) => fd.set(k, v));
-    fd.set('form-name', 'orders');
-    await fetch('/', { method:'POST', body: fd });
+    // Save order to Netlify Forms privately (optional)
+    await fetch('/', {
+      method:'POST',
+      headers:{'Content-Type':'application/x-www-form-urlencoded'},
+      body:new URLSearchParams({
+        'form-name':'orders',
+        customer_name:name,
+        customer_email:email,
+        customer_phone:phone,
+        delivery_address:addr,
+        subtotal:ZAR(sum),
+        shipping:ZAR(ship),
+        total:ZAR(sum+ship),
+        cart_json:JSON.stringify(cart)
+      })
+    });
+
+    cart = {}; saveCart(); drawCart();
+    dialog && dialog.close();
+    alert('Thank you! Your payment was successful.');
   }
+  el('#coForm')?.addEventListener('submit', payWithYoco);
 
   /* ---------- Filters & Search ---------- */
   function buildFilters(){
@@ -578,16 +535,20 @@ yoco.showPopup({
   render();
   updateCounts();
   drawCart();
-
-  // Open checkout
-  const checkoutBtn = el('#checkoutBtn');
-  if (checkoutBtn) checkoutBtn.onclick = ()=>{
-    if(!Object.keys(cart).length) return alert('Your cart is empty.');
-    const d = el('#checkout'); if(d && d.showModal) { buildSummary(); d.showModal(); }
-  };
-  const closeCheckout = el('#closeCheckout');
-  if (closeCheckout) closeCheckout.onclick = ()=> el('#checkout')?.close();
   </script>
+
+  <!-- Netlify form (hidden) -->
+  <form name="orders" data-netlify="true" netlify-honeypot="bot-field" hidden>
+    <input name="bot-field"/>
+    <input name="customer_name"/>
+    <input name="customer_email"/>
+    <input name="customer_phone"/>
+    <input name="delivery_address"/>
+    <input name="subtotal"/>
+    <input name="shipping"/>
+    <input name="total"/>
+    <textarea name="cart_json"></textarea>
+  </form>
 </body>
 </html>
 
