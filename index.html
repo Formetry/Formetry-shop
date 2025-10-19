@@ -444,29 +444,29 @@ dialog[open] { z-index: 10000; }
     const total = sum + ship;
 
     const yoco = new window.YocoSDK({ publicKey: YOCO_PUBLIC_KEY });
-    const { error: openErr, result: tokenResult } = await yoco.showPopup({
-	const checkoutBtn = el('#checkoutBtn');
-	if (checkoutBtn) checkoutBtn.onclick = async (e) => {
-		if (!Object.keys(cart).length) return alert('Your cart is empty.');
+    // Wire the Checkout button ONCE
+const checkoutBtn = el('#checkoutBtn');
+
+if (checkoutBtn) checkoutBtn.onclick = async (e) => {
+  if (!Object.keys(cart).length) return alert('Your cart is empty.');
 
   const btn = e.currentTarget;
   const checkoutDlg = el('#checkout');
   const cartDrawer  = el('#drawer');
 
-  // Build totals
+  // Totals
   const ship  = el('#ship') ? Number(el('#ship').value || 0) : 0;
   const sum   = subtotal();
   const total = sum + ship;
 
   try {
-    // Prevent double clicks
+    // UI state so Yoco can sit on top
     if (btn) { btn.disabled = true; btn.textContent = 'Opening secure payment…'; }
+    checkoutDlg?.classList.add('hide-for-yoco');
+    cartDrawer?.classList.add('hide-for-yoco');
 
-    // Hide our overlays (so Yoco popup is visible)
-    if (checkoutDlg) checkoutDlg.classList.add('hide-for-yoco');
-    if (cartDrawer)  cartDrawer.classList.add('hide-for-yoco');
-
-    // Open Yoco popup
+    // Create Yoco instance and open popup (NOW inside async handler)
+    const yoco = new window.YocoSDK({ publicKey: YOCO_PUBLIC_KEY });
     const { error: openErr, result: tokenResult } = await yoco.showPopup({
       amountInCents: Math.round(total * 100),
       currency: 'ZAR',
@@ -475,23 +475,21 @@ dialog[open] { z-index: 10000; }
       customer: { email: el('#email')?.value || '' }
     });
 
-    // Restore the overlays afterwards
-    if (checkoutDlg) checkoutDlg.classList.remove('hide-for-yoco');
-    if (cartDrawer)  cartDrawer.classList.remove('hide-for-yoco');
+    // Restore UI
+    checkoutDlg?.classList.remove('hide-for-yoco');
+    cartDrawer?.classList.remove('hide-for-yoco');
     if (btn) { btn.disabled = false; btn.textContent = 'Pay Securely with Card'; }
 
-    // If popup couldn’t open at all
+    // If popup couldn’t open or user closed it
     if (openErr) {
       console.error('Yoco open error:', openErr);
-      return alert('We couldn’t open the secure payment window. Please check popup blockers.');
+      return alert('We couldn’t open the secure payment window. Please try again.');
     }
-
-    // If user closed without completing payment
     if (!tokenResult?.id) {
       return alert('Payment was cancelled. No charge was made.');
     }
 
-    // If we got a token, send to Netlify to process payment
+    // Send token to Netlify Function
     const name  = el('#buyerName')?.value || '';
     const email = el('#email')?.value || '';
     const phone = el('#phone')?.value || '';
@@ -517,20 +515,21 @@ dialog[open] { z-index: 10000; }
       return alert('Payment failed. Please try a different card or contact us.');
     }
 
-    // Success!
+    // Success
     cart = {};
     saveCart();
     drawCart();
-    if (checkoutDlg) checkoutDlg.close?.();
+    checkoutDlg?.close?.();
     alert('Payment successful! Thank you — your order has been received.');
   } catch (err) {
     console.error(err);
-    if (checkoutDlg) checkoutDlg.classList.remove('hide-for-yoco');
-    if (cartDrawer)  cartDrawer.classList.remove('hide-for-yoco');
+    checkoutDlg?.classList.remove('hide-for-yoco');
+    cartDrawer?.classList.remove('hide-for-yoco');
     if (btn) { btn.disabled = false; btn.textContent = 'Pay Securely with Card'; }
     alert('Something went wrong while processing the payment. Please try again.');
   }
 };
+
 
 
     // Save order to Netlify Forms privately (optional)
@@ -615,4 +614,3 @@ dialog[open] { z-index: 10000; }
   </form>
 </body>
 </html>
-
