@@ -86,6 +86,21 @@
 
     /* Yoco popup fix (always on top) */
     #yoco-widget-modal-container, .yoco-widget-overlay, [id^="yoco-widget"], [class*="yoco"] { z-index:999999 !important; position:relative; }
+	
+	/* Put Yoco above all overlays */
+.yoco-overlay,
+#yoco-widget-container,
+iframe[src*="yoco"] {
+  z-index: 200000 !important;
+  position: fixed !important;
+}
+
+/* While Yoco is open, hide our own overlays so they don't block it */
+.hide-for-yoco { display: none !important; }
+
+/* Make sure your <dialog> can sit above the page when visible */
+dialog[open] { z-index: 10000; }
+
   </style>
 </head>
 
@@ -430,44 +445,93 @@
 
     const yoco = new window.YocoSDK({ publicKey: YOCO_PUBLIC_KEY });
     const { error: openErr, result: tokenResult } = await yoco.showPopup({
+	const checkoutBtn = el('#checkoutBtn');
+	if (checkoutBtn) checkoutBtn.onclick = async (e) => {
+		if (!Object.keys(cart).length) return alert('Your cart is empty.');
+
+  const btn = e.currentTarget;
+  const checkoutDlg = el('#checkout');
+  const cartDrawer  = el('#drawer');
+
+  // Build totals
+  const ship  = el('#ship') ? Number(el('#ship').value || 0) : 0;
+  const sum   = subtotal();
+  const total = sum + ship;
+
+  try {
+    // Prevent double clicks
+    if (btn) { btn.disabled = true; btn.textContent = 'Opening secure payment…'; }
+
+    // Hide our overlays (so Yoco popup is visible)
+    if (checkoutDlg) checkoutDlg.classList.add('hide-for-yoco');
+    if (cartDrawer)  cartDrawer.classList.add('hide-for-yoco');
+
+    // Open Yoco popup
+    const { error: openErr, result: tokenResult } = await yoco.showPopup({
       amountInCents: Math.round(total * 100),
       currency: 'ZAR',
       name: 'Formetry',
-      description: `Order for ${name}`,
-      customer: { email }
+      description: `Order for ${el('#buyerName')?.value || 'customer'}`,
+      customer: { email: el('#email')?.value || '' }
     });
 
-    if (openErr){
-      console.error(openErr);
-      return alert('Payment popup was closed or failed to open.');
-    }
-    if(!tokenResult || !tokenResult.id){
-      return alert('Could not create payment token. Please try again.');
+    // Restore the overlays afterwards
+    if (checkoutDlg) checkoutDlg.classList.remove('hide-for-yoco');
+    if (cartDrawer)  cartDrawer.classList.remove('hide-for-yoco');
+    if (btn) { btn.disabled = false; btn.textContent = 'Pay Securely with Card'; }
+
+    // If popup couldn’t open at all
+    if (openErr) {
+      console.error('Yoco open error:', openErr);
+      return alert('We couldn’t open the secure payment window. Please check popup blockers.');
     }
 
-    try{
-      const res = await fetch('/.netlify/functions/yoco-charge', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          token: tokenResult.id,
-          amountInCents: Math.round(total * 100),
-          currency: 'ZAR',
-          description: `Formetry order for ${name}`,
-          customer: { name, email, phone },
-          shippingAddress: addr,
-          cart: Object.keys(cart).map(k=>({ key:k, ...cart[k] }))
-        })
-      });
-      const data = await res.json();
-      if(!res.ok || !data.ok){
-        console.error('Charge error:', data);
-        return alert('Payment failed: ' + (data.message || 'Please try another card.'));
-      }
-    }catch(err){
-      console.error(err);
-      return alert('Payment failed. Please try again.');
+    // If user closed without completing payment
+    if (!tokenResult?.id) {
+      return alert('Payment was cancelled. No charge was made.');
     }
+
+    // If we got a token, send to Netlify to process payment
+    const name  = el('#buyerName')?.value || '';
+    const email = el('#email')?.value || '';
+    const phone = el('#phone')?.value || '';
+    const addr  = el('#addr')?.value  || '';
+
+    const res = await fetch('/.netlify/functions/yoco-charge', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        token: tokenResult.id,
+        amountInCents: Math.round(total * 100),
+        currency: 'ZAR',
+        description: `Formetry order for ${name}`,
+        customer: { name, email, phone },
+        shippingAddress: addr,
+        cart: JSON.stringify(cart || {})
+      })
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data?.ok) {
+      console.error('Charge error:', data);
+      return alert('Payment failed. Please try a different card or contact us.');
+    }
+
+    // Success!
+    cart = {};
+    saveCart();
+    drawCart();
+    if (checkoutDlg) checkoutDlg.close?.();
+    alert('Payment successful! Thank you — your order has been received.');
+  } catch (err) {
+    console.error(err);
+    if (checkoutDlg) checkoutDlg.classList.remove('hide-for-yoco');
+    if (cartDrawer)  cartDrawer.classList.remove('hide-for-yoco');
+    if (btn) { btn.disabled = false; btn.textContent = 'Pay Securely with Card'; }
+    alert('Something went wrong while processing the payment. Please try again.');
+  }
+};
+
 
     // Save order to Netlify Forms privately (optional)
     await fetch('/', {
