@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Formetry – 3D Print Shop</title>
 
-  <!-- Google Analytics (replace G-XXXXXXXXXX with your GA4 ID when ready) -->
+  <!-- Google Analytics (replace G-XXXXXXXXXX when you’re ready) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -14,14 +14,12 @@
     gtag('config', 'G-XXXXXXXXXX');
   </script>
 
+  <!-- Favicon / brand logo -->
+  <link rel="icon" id="favicon" href="Logo (black background).png">
+
   <!-- Yoco Web SDK -->
   <script src="https://js.yoco.com/sdk/v1/yoco-sdk-web.js"></script>
-  <script>
-    /* ✅ Your live public key */
-    const YOCO_PUBLIC_KEY = "pk_live_6a754a5b9AO2rL062bf4";
-  </script>
 
-  <link rel="icon" id="favicon" href="Logo (black background).png">
   <style>
     :root{ --bg:#0b0d10; --fg:#f4f6f8; --muted:#c7ccd1; --pri:#6ee7ff; --pri-2:#8b5cf6; --line:#20242c; }
     *{box-sizing:border-box}
@@ -30,16 +28,28 @@
     .hero{display:flex;flex-direction:column;align-items:center;gap:16px;padding:42px 0 10px}
     .hero-logo{height:96px}
     .hero-title{font-size:42px;font-weight:800;margin:0}
+
     .filters{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:12px 0 20px}
     .filters button{padding:8px 14px;border-radius:12px;border:1px solid var(--line);background:#11151b;color:var(--fg);cursor:pointer}
     .filters button.active{background:linear-gradient(90deg,var(--pri),var(--pri-2));color:#0a0c10;font-weight:700;border:none}
+
     .search-box{margin:0 auto 20px;max-width:460px;display:flex;gap:6px;position:relative}
-    .search-box input{flex:1;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:#0f1319;color:var(--fg)}
+    .search-box input{flex:1;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:#0f1319;color:#fff}
     .search-box button{padding:0 14px;border-radius:12px;border:1px solid var(--line);background:#11151b;color:var(--fg);cursor:pointer}
+
     .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
     .card{border:1px solid var(--line);background:linear-gradient(180deg,#0e1217,#0b0f14);border-radius:18px;overflow:hidden;display:flex;flex-direction:column}
-    .thumb{aspect-ratio:4/3;background:#0c1016;border-bottom:1px solid var(--line);position:relative;overflow:hidden;display:grid;place-items:center;cursor:zoom-in}
-    .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+    .thumb{
+      aspect-ratio: 4 / 3;
+      background:#0c1016;
+      border-bottom:1px solid var(--line);
+      position: relative;
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+      cursor: zoom-in;
+    }
+    .thumb img{width:100%;height:100%;display:block;object-fit:cover;object-position:center}
     .card-body{padding:14px}
     .title{font-weight:700;margin:0 0 6px}
     .muted{color:var(--muted);font-size:14px}
@@ -48,62 +58,52 @@
     .btn.primary{background:linear-gradient(90deg,var(--pri),var(--pri-2));color:#0a0c10;font-weight:700;border:none}
     .btn.full{width:100%}
     .txt{width:100%;margin-bottom:8px;padding:10px;border-radius:10px;border:1px solid var(--line);background:#0f1319;color:#fff}
-    .invalid{border-color:#ef4444;box-shadow:0 0 0 2px rgba(239,68,68,.25)}
-    .hint{font-size:12px;color:#c7ccd1;margin-top:4px}
+    .invalid{border-color:#ef4444; box-shadow:0 0 0 2px rgba(239,68,68,.25)}
+    .hint{font-size:12px; color:#c7ccd1; margin-top:4px}
     .hint.error{color:#ef9a9a}
+
+    /* Make typed and autofilled text white/readable */
+    input,select,textarea{background:#0f1319;color:#fff;border:1px solid var(--line);border-radius:12px;padding:10px}
+    input:-webkit-autofill,
+    textarea:-webkit-autofill,
+    select:-webkit-autofill{
+      -webkit-text-fill-color:#fff;
+      -webkit-box-shadow:0 0 0 30px #0f1319 inset!important;
+      caret-color:#fff;
+    }
+
     .cart-fab{position:fixed;right:20px;bottom:20px;background:linear-gradient(90deg,var(--pri),var(--pri-2));color:#0a0c10;border:none;border-radius:16px;padding:14px 16px;font-weight:800;box-shadow:0 10px 30px rgba(110,231,255,.25);cursor:pointer;z-index:20}
     .drawer{position:fixed;inset:0;pointer-events:none}
     .drawer.open{pointer-events:auto}
     .drawer .shade{position:absolute;inset:0;background:rgba(0,0,0,.5);opacity:0;transition:.2s}
     .drawer.open .shade{opacity:1}
-    .panel{position:absolute;top:0;right:-420px;width:100%;max-width:420px;height:100%;background:#0e1217;border-left:1px solid var(--line);transition:.25s;padding:18px;display:flex;flex-direction:column;z-index:30}
+    .panel{position:absolute;top:0;right:-420px;width:100%;max-width:420px;height:100%;background:#0e1217;border-left:1px solid var(--line);transition:.25s;padding:18px;display:flex;flex-direction:column}
     .drawer.open .panel{right:0}
     .row{display:flex;align-items:center;gap:8px;justify-content:space-between}
     .cart-items{margin-top:12px;display:flex;flex-direction:column;gap:10px;overflow:auto}
     .ci{display:grid;grid-template-columns:56px 1fr auto;gap:10px;padding:10px;border:1px solid var(--line);border-radius:12px;background:#0f1319}
     .ci img{width:56px;height:56px;object-fit:cover;border-radius:10px}
     .qty{display:flex;align-items:center;gap:8px}
-    .qty button{width:28px;height:28px;border-radius:8px;border:1px solid var(--line);background:#0f1319;color:var(--fg);cursor:pointer}
+    .qty button{width:28px;height:28px;border-radius:8px;border:1px solid var(--line);background:#0f1319;color:#fff;cursor:pointer}
     .totals{margin-top:auto;padding-top:12px;border-top:1px dashed var(--line)}
+
     dialog{border:none;border-radius:16px;background:#0e1217;color:#f4f6f8;padding:0;max-width:720px;width:92%}
     .modal-body{padding:18px}
     .modal-head{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--line)}
     footer{margin-top:24px;display:flex;justify-content:space-between;align-items:center;color:#c7ccd1}
     label{color:#c7ccd1;font-size:14px}
+    .input{display:flex;flex-direction:column;gap:6px}
 
-    /* ✅ Readable input text + autofill fix */
-    input, select, textarea { background:#0f1319; color:#fff !important; border:1px solid var(--line); border-radius:12px; padding:10px; caret-color:#fff; }
-    input::placeholder, textarea::placeholder { color:#aaa !important; opacity:1; }
-    input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill {
-      -webkit-text-fill-color:#fff !important;
-      box-shadow:0 0 0 1000px #0f1319 inset !important;
-      transition:background-color 5000s ease-in-out 0s;
-    }
+    /* Hide our UI briefly while Yoco is opening so it’s always on top */
+    .hide-for-yoco { display: none !important; }
 
-    /* Image lightbox */
-    #imgLightbox::backdrop{background:rgba(0,0,0,.7)}
-    #imgLightbox img{max-width:90vw;max-height:80vh;display:block;border-radius:12px}
-
-    /* Yoco popup fix (always on top) */
-    #yoco-widget-modal-container, .yoco-widget-overlay, [id^="yoco-widget"], [class*="yoco"] { z-index:999999 !important; position:relative; }
-	
-	/* Put Yoco above all overlays */
-.yoco-overlay,
-#yoco-widget-container,
-iframe[src*="yoco"] {
-  z-index: 200000 !important;
-  position: fixed !important;
-}
-
-/* While Yoco is open, hide our own overlays so they don't block it */
-.hide-for-yoco { display: none !important; }
-
-/* Make sure your <dialog> can sit above the page when visible */
-dialog[open] { z-index: 10000; }
-
+    /* Lightbox (image viewer) */
+    .lightbox{position:fixed;inset:0;background:rgba(0,0,0,.9);display:none;align-items:center;justify-content:center;z-index:50}
+    .lightbox.open{display:flex}
+    .lightbox img{max-width:90vw;max-height:90vh;border-radius:12px}
+    .lightbox .close{position:absolute;top:16px;right:16px;background:#11151b;border:1px solid var(--line);color:#fff;border-radius:10px;padding:8px 12px;cursor:pointer}
   </style>
 </head>
-
 <body>
   <main class="container">
     <section class="hero" aria-label="Store header">
@@ -127,7 +127,9 @@ dialog[open] { z-index: 10000; }
         <details>
           <summary style="cursor:pointer;color:#f4f6f8">Shipping</summary>
           <div>
-            <p><strong>Courier (R100 flat):</strong> 2–5 business days after dispatch. <strong>FREE over R1000</strong>.</p>
+            <p><strong>Collection (Free):</strong> We’ll message you when your order is ready.</p>
+            <p><strong>Courier (R100 flat):</strong> 2–5 business days after dispatch.</p>
+            <p><strong>Free shipping for orders ≥ R1000.</strong></p>
             <p><strong>Lead time:</strong> Most items are made to order. Please allow 2–5 days to print before dispatch.</p>
             <p><strong>Colours:</strong> “Limited colours” means small batch availability—shades may vary slightly.</p>
           </div>
@@ -138,7 +140,6 @@ dialog[open] { z-index: 10000; }
             <p><strong>Damaged/Faulty on arrival:</strong> Contact us within 7 days with photos. We’ll repair, replace, or refund (we cover return courier if defective).</p>
             <p><strong>Change of mind:</strong> Within 7 days, unused and in original condition—refund or exchange (return courier at customer’s cost).</p>
             <p><strong>Customised items:</strong> Non-returnable unless faulty.</p>
-            <p><strong>Wear & tear / misuse:</strong> Not covered.</p>
           </div>
         </details>
         <details>
@@ -177,6 +178,7 @@ dialog[open] { z-index: 10000; }
     </footer>
   </main>
 
+  <!-- Floating cart button -->
   <button class="cart-fab" id="fab">🛒 View Cart (<span id="fabCount">0</span>)</button>
 
   <!-- Cart Drawer -->
@@ -192,12 +194,16 @@ dialog[open] { z-index: 10000; }
       <div id="cartItems" class="cart-items"></div>
       <div class="totals">
         <div class="row"><span style="color:#c7ccd1">Subtotal</span><strong id="subtotal">R0.00</strong></div>
-        <div class="row" id="shipRow">
-          <span style="color:#c7ccd1" id="shipLabel">Shipping</span>
-          <strong id="shipAmount">R0.00</strong>
+        <div class="row"><span style="color:#c7ccd1">Shipping</span>
+          <span>
+            <select id="ship">
+              <option value="100">Standard Courier (R100)</option>
+              <option value="0" disabled>Free shipping over R1000 (auto)</option>
+            </select>
+          </span>
         </div>
         <div class="row" style="margin-top:6px;font-size:18px"><span>Total</span><strong id="total">R0.00</strong></div>
-        <button class="btn primary" id="checkoutBtn" style="margin-top:12px;width:100%">Checkout</button>
+        <button class="btn primary" id="checkoutBtn" style="margin-top:12px;width:100%">Pay Securely with Card</button>
       </div>
     </aside>
   </div>
@@ -211,14 +217,15 @@ dialog[open] { z-index: 10000; }
       <button class="btn" id="closeCheckout" style="color:white">Close</button>
     </div>
     <div class="modal-body">
-      <form id="coForm">
+      <form id="coForm" onsubmit="return false;">
         <div class="input"><label for="buyerName">Full name</label><input id="buyerName" required></div>
         <div class="input"><label for="email">Email</label><input id="email" type="email" required></div>
         <div class="input"><label for="phone">Phone (WhatsApp)</label><input id="phone" required></div>
-        <div class="input"><label for="addr">Delivery Address (street, suburb, city, postal code)</label><textarea id="addr" rows="3"></textarea></div>
+        <div class="input"><label for="addr">Delivery Address (if courier)</label><textarea id="addr" rows="3"></textarea></div>
         <div class="empty" id="summaryBox">Cart is empty.</div>
         <div style="margin-top:14px;display:flex;gap:10px;justify-content:flex-end">
-          <button type="submit" class="btn primary" id="payYoco">Pay Securely with Card</button>
+          <button type="button" class="btn" id="copyWhatsApp">Copy WhatsApp Order</button>
+          <button type="button" class="btn primary" id="checkoutBtn2">Pay Securely with Card</button>
         </div>
       </form>
       <footer>
@@ -229,28 +236,32 @@ dialog[open] { z-index: 10000; }
   </dialog>
 
   <!-- Image Lightbox -->
-  <dialog id="imgLightbox">
-    <img id="lightboxImg" alt="Preview"/>
-  </dialog>
+  <div class="lightbox" id="lightbox">
+    <button class="close" id="lbClose">Close</button>
+    <img id="lbImg" alt="">
+  </div>
 
   <script>
-  /* ---------- Helpers & Branding ---------- */
+  /* ==================== Helpers & Branding ==================== */
   const ZAR = n => `R${n.toFixed(2)}`;
-  const el = s => document.querySelector(s);
+  const el  = s => document.querySelector(s);
   const els = s => Array.from(document.querySelectorAll(s));
-  const FREE_SHIP_THRESHOLD = 1000;
-  const FLAT_SHIP = 100;
 
-  const BRAND = { name: 'Formetry', logo: 'Logo (black background).png' };
+  const DEFAULT_WHATSAPP = '27791987540';
+
+  const BRAND = {
+    name: localStorage.getItem('brand_name') || 'Formetry',
+    logo: localStorage.getItem('brand_logo') || 'Logo (black background).png'
+  };
   function applyBrand(){
     document.title = `${BRAND.name} – 3D Print Shop`;
     const bt = el('#brandTitle'); if(bt) bt.textContent = BRAND.name;
     els('[data-brand]').forEach(n => n.textContent = BRAND.name);
-    els('img[data-logo]').forEach(img => { img.src = BRAND.logo; });
+    els('img[data-logo]').forEach(img => { if(!img.src.endsWith(BRAND.logo)) img.src = BRAND.logo; });
     const fav = el('#favicon'); if(fav) fav.href = BRAND.logo;
   }
 
-  /* ---------- Products ---------- */
+  /* ========================= Products ========================= */
   const PRODUCTS = [
     { id:'custom-piggy-bank', name:'Customized Piggy Bank', price:250, cat:'custom', img:'Personalised piggy bank box.png', desc:'Get personal with your savings – add your name to the piggy bank!' },
     { id:'yarn-bowl', name:'Yarn Bowl', price:350, cat:'hobbies', img:'Yarn bowl Upscaled to 150.png', desc:'Crochet with style AND comfort.' },
@@ -271,7 +282,7 @@ dialog[open] { z-index: 10000; }
     { id:'wall-wolf', name:'3D wall art - Wolf', price:180, cat:'home', img:'7. 3D wall art - Wolf.png', desc:'Width: 190mm Length: 264mm' },
   ];
 
-  /* ---------- Cart State ---------- */
+  /* ===================== Cart state & utils =================== */
   let cart = JSON.parse(localStorage.getItem('skai_cart') || '{}');
   let currentFilter = localStorage.getItem('skai_filter') || 'all';
   let searchTerm = (localStorage.getItem('skai_search') || '').toLowerCase();
@@ -280,7 +291,6 @@ dialog[open] { z-index: 10000; }
   function updateCounts(){ const count = Object.values(cart).reduce((a,b)=>a+b.qty,0); const c = el('#fabCount'); if(c) c.textContent = count; }
   function lineKey(id, name){ return `${id}::${(name||'').toLowerCase()}`; }
 
-  /* ---------- Add/Remove ---------- */
   function add(id){
     const p = PRODUCTS.find(x => x.id === id); if(!p) return;
     const input = el(`#nameInput-${id}`); const customName = input ? input.value.trim() : '';
@@ -300,7 +310,7 @@ dialog[open] { z-index: 10000; }
     saveCart(); drawCart();
   }
 
-  /* ---------- Render Grid ---------- */
+  /* ======================= Render products ==================== */
   function render(){
     const g = el('#grid'); if(!g) return; g.innerHTML = '';
     const term = (searchTerm || '').toLowerCase();
@@ -314,7 +324,7 @@ dialog[open] { z-index: 10000; }
           <input class="txt" type="text" id="nameInput-${p.id}" placeholder="Enter name for piggy bank"/>
           <div class="hint" id="hint-nameInput-${p.id}"></div>` : '';
         c.innerHTML = `
-          <div class="thumb" data-zoom="${p.img}"><img alt="${p.name}" src="${p.img}" loading="lazy"/></div>
+          <div class="thumb" data-img="${p.img}"><img alt="${p.name}" src="${p.img}" loading="lazy"/></div>
           <div class="card-body">
             <h3 class="title">${p.name}</h3>
             <div class="muted">${p.desc}</div>
@@ -334,24 +344,18 @@ dialog[open] { z-index: 10000; }
     }
   }
 
-  /* ---------- Totals & Cart Drawer ---------- */
+  /* ====================== Totals & drawer ===================== */
   function subtotal(){ let s=0; for(const key in cart){ const line=cart[key]; const p=PRODUCTS.find(x=>x.id===line.id); if(p) s += p.price*line.qty; } return s; }
-  function shippingFor(sub){ return sub >= FREE_SHIP_THRESHOLD ? 0 : (sub>0?FLAT_SHIP:0); }
   function updateTotals(){
     const sub = subtotal();
-    const ship = shippingFor(sub);
-    const se = el('#subtotal'); const te = el('#total');
-    const sl = el('#shipLabel'); const sa = el('#shipAmount'); const sr = el('#shipRow');
-
-    if(sl && sa && sr){
-      if(sub===0){ sr.style.display='none'; }
-      else{
-        sr.style.display='flex';
-        if(ship===0){ sl.textContent = `Shipping (FREE over R${FREE_SHIP_THRESHOLD})`; sa.textContent = 'R0.00'; }
-        else{ sl.textContent = 'Shipping (Standard Courier)'; sa.textContent = ZAR(ship); }
-      }
+    // Free shipping for orders >= 1000
+    const shipSel = el('#ship');
+    if (shipSel) {
+      if (sub >= 1000) shipSel.value = '0';
+      else shipSel.value = shipSel.value === '0' ? '100' : shipSel.value; // keep selection sane
     }
-
+    const ship = shipSel ? Number(shipSel.value||0) : 0;
+    const se = el('#subtotal'); const te = el('#total');
     if(se) se.textContent = ZAR(sub);
     if(te) te.textContent = ZAR(sub + ship);
   }
@@ -366,9 +370,9 @@ dialog[open] { z-index: 10000; }
       const tag = line.customName ? ` (Name: ${line.customName})` : '';
       lines.push(`${p.name}${tag} × ${line.qty} — ${ZAR(p.price*line.qty)}`);
     }
+    const ship = el('#ship') ? Number(el('#ship').value||0) : 0;
     const sum = subtotal();
-    const ship = shippingFor(sum);
-    box.innerHTML = `<strong>Order Summary</strong><br>${lines.join('<br>')}<br><br><em>Shipping:</em> ${ZAR(ship)}${sum>=FREE_SHIP_THRESHOLD?' (FREE)':''}<br><em>Subtotal:</em> ${ZAR(sum)}<br><strong>Total:</strong> ${ZAR(sum+ship)}`;
+    box.innerHTML = `<strong>Order Summary</strong><br>${lines.join('<br>')}<br><br><em>Shipping:</em> ${ZAR(ship)}<br><em>Subtotal:</em> ${ZAR(sum)}<br><strong>Total:</strong> ${ZAR(sum+ship)}`;
   }
   function drawCart(){
     const wrap = el('#cartItems'); if(!wrap) return; wrap.innerHTML='';
@@ -392,7 +396,31 @@ dialog[open] { z-index: 10000; }
     updateTotals(); buildSummary();
   }
 
-  /* ---------- Events ---------- */
+  /* =================== Clipboard / WhatsApp =================== */
+  function sanitizeForClipboard(str){
+    return String(str||'')
+      .replace(/\r\n?/g,'\n')
+      .replace(/[\u2028\u2029]/g,'\n')
+      .replace(/\0/g,'')
+      .normalize('NFC');
+  }
+  async function copyLinkToClipboard(url){
+    try{
+      await navigator.clipboard.writeText(url);
+      alert('WhatsApp order link copied. Paste into your browser or share.');
+    }catch(err){
+      try{
+        const ta=document.createElement('textarea'); ta.value=url; document.body.appendChild(ta);
+        ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+        alert('WhatsApp order link copied (fallback).');
+      }catch(e2){
+        window.open(url,'_blank');
+        alert('We opened WhatsApp Web. If it didn\'t open, copy this link:\n'+url);
+      }
+    }
+  }
+
+  /* =========================== UI events ====================== */
   document.body.addEventListener('click', e=>{
     const addId = e.target.getAttribute('data-add');
     if(addId){
@@ -405,157 +433,29 @@ dialog[open] { z-index: 10000; }
     }
     const decKey = e.target.getAttribute('data-dec'); if(decKey){ dec(decKey); }
     if(e.target.hasAttribute('data-close')){ const d = el('#drawer'); if(d) d.classList.remove('open'); }
-  });
 
-  /* Lightbox for images */
-  document.addEventListener('click', (ev)=>{
-    const target = ev.target.closest('.thumb');
-    if(!target) return;
-    const src = target.getAttribute('data-zoom');
-    const dlg = el('#imgLightbox'); const img = el('#lightboxImg');
-    if(dlg && img){ img.src = src; dlg.showModal(); }
+    // GA: add_to_cart
+    if(addId && typeof gtag==='function'){
+      const p = PRODUCTS.find(x=>x.id===addId);
+      gtag('event','add_to_cart',{ item_id:addId, item_name:p?.name, value:p?.price, currency:'ZAR' });
+    }
   });
-  el('#imgLightbox')?.addEventListener('click', e => e.currentTarget.close());
 
   const fab = el('#fab'); if(fab) fab.onclick = ()=>{ const d = el('#drawer'); if(d){ d.classList.add('open'); drawCart(); } };
+  const shipSel = el('#ship'); if(shipSel) shipSel.onchange = ()=>{ updateTotals(); buildSummary(); };
+
   const dialog = el('#checkout');
-  const checkoutBtn = el('#checkoutBtn');
-  if(checkoutBtn) checkoutBtn.onclick = ()=>{
-    if(!Object.keys(cart).length) return alert('Your cart is empty.');
-    if(dialog && dialog.showModal) dialog.showModal();
-    buildSummary();
-  };
-  const closeCheckout = el('#closeCheckout'); if(closeCheckout) closeCheckout.onclick = ()=> dialog && dialog.close();
+  const openCheckout = () => { if(!Object.keys(cart).length){ alert('Your cart is empty.'); return; } dialog?.showModal(); buildSummary(); el('#fab')?.classList.add('hide-for-yoco'); };
+  const closeCheckoutBtn = el('#closeCheckout');
+  if(closeCheckoutBtn) closeCheckoutBtn.onclick = ()=>{ dialog?.close(); el('#fab')?.classList.remove('hide-for-yoco'); };
 
-  /* ---------- Yoco Payment ---------- */
-  async function payWithYoco(evt){
-    evt.preventDefault();
-    if(!Object.keys(cart).length) return alert('Your cart is empty.');
+  // Cheap "Checkout" alias inside drawer and inside dialog
+  const checkoutBtnDrawer = el('#checkoutBtn');
+  const checkoutBtnDialog = el('#checkoutBtn2');
+  if (checkoutBtnDrawer) checkoutBtnDrawer.addEventListener('click', openCheckout);
+  if (checkoutBtnDialog) checkoutBtnDialog.addEventListener('click', () => {/* handled below by Yoco handler */});
 
-    const name  = el('#buyerName').value.trim();
-    const email = el('#email').value.trim();
-    const phone = el('#phone').value.trim();
-    const addr  = el('#addr').value.trim();
-
-    if(!name || !email || !phone) return alert('Please fill in your name, email and phone.');
-
-    const sum = subtotal();
-    const ship = shippingFor(sum);
-    const total = sum + ship;
-
-    const yoco = new window.YocoSDK({ publicKey: YOCO_PUBLIC_KEY });
-    // Wire the Checkout button ONCE
-const checkoutBtn = el('#checkoutBtn');
-
-if (checkoutBtn) checkoutBtn.onclick = async (e) => {
-  if (!Object.keys(cart).length) return alert('Your cart is empty.');
-
-  const btn = e.currentTarget;
-  const checkoutDlg = el('#checkout');
-  const cartDrawer  = el('#drawer');
-
-  // Totals
-  const ship  = el('#ship') ? Number(el('#ship').value || 0) : 0;
-  const sum   = subtotal();
-  const total = sum + ship;
-
-  try {
-    // UI state so Yoco can sit on top
-    if (btn) { btn.disabled = true; btn.textContent = 'Opening secure payment…'; }
-    checkoutDlg?.classList.add('hide-for-yoco');
-    cartDrawer?.classList.add('hide-for-yoco');
-
-    // Create Yoco instance and open popup (NOW inside async handler)
-    const yoco = new window.YocoSDK({ publicKey: YOCO_PUBLIC_KEY });
-    const { error: openErr, result: tokenResult } = await yoco.showPopup({
-      amountInCents: Math.round(total * 100),
-      currency: 'ZAR',
-      name: 'Formetry',
-      description: `Order for ${el('#buyerName')?.value || 'customer'}`,
-      customer: { email: el('#email')?.value || '' }
-    });
-
-    // Restore UI
-    checkoutDlg?.classList.remove('hide-for-yoco');
-    cartDrawer?.classList.remove('hide-for-yoco');
-    if (btn) { btn.disabled = false; btn.textContent = 'Pay Securely with Card'; }
-
-    // If popup couldn’t open or user closed it
-    if (openErr) {
-      console.error('Yoco open error:', openErr);
-      return alert('We couldn’t open the secure payment window. Please try again.');
-    }
-    if (!tokenResult?.id) {
-      return alert('Payment was cancelled. No charge was made.');
-    }
-
-    // Send token to Netlify Function
-    const name  = el('#buyerName')?.value || '';
-    const email = el('#email')?.value || '';
-    const phone = el('#phone')?.value || '';
-    const addr  = el('#addr')?.value  || '';
-
-    const res = await fetch('/.netlify/functions/yoco-charge', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        token: tokenResult.id,
-        amountInCents: Math.round(total * 100),
-        currency: 'ZAR',
-        description: `Formetry order for ${name}`,
-        customer: { name, email, phone },
-        shippingAddress: addr,
-        cart: JSON.stringify(cart || {})
-      })
-    });
-
-    const data = await res.json();
-    if (!res.ok || !data?.ok) {
-      console.error('Charge error:', data);
-      return alert('Payment failed. Please try a different card or contact us.');
-    }
-
-    // Success
-    cart = {};
-    saveCart();
-    drawCart();
-    checkoutDlg?.close?.();
-    alert('Payment successful! Thank you — your order has been received.');
-  } catch (err) {
-    console.error(err);
-    checkoutDlg?.classList.remove('hide-for-yoco');
-    cartDrawer?.classList.remove('hide-for-yoco');
-    if (btn) { btn.disabled = false; btn.textContent = 'Pay Securely with Card'; }
-    alert('Something went wrong while processing the payment. Please try again.');
-  }
-};
-
-
-
-    // Save order to Netlify Forms privately (optional)
-    await fetch('/', {
-      method:'POST',
-      headers:{'Content-Type':'application/x-www-form-urlencoded'},
-      body:new URLSearchParams({
-        'form-name':'orders',
-        customer_name:name,
-        customer_email:email,
-        customer_phone:phone,
-        delivery_address:addr,
-        subtotal:ZAR(sum),
-        shipping:ZAR(ship),
-        total:ZAR(sum+ship),
-        cart_json:JSON.stringify(cart)
-      })
-    });
-
-    cart = {}; saveCart(); drawCart();
-    dialog && dialog.close();
-    alert('Thank you! Your payment was successful.');
-  }
-  el('#coForm')?.addEventListener('submit', payWithYoco);
-
-  /* ---------- Filters & Search ---------- */
+  // Search & filters
   function buildFilters(){
     const f = el('#filters'); if(!f) return; f.innerHTML='';
     const cats = ['all', ...new Set(PRODUCTS.map(p=>p.cat))];
@@ -567,7 +467,6 @@ if (checkoutBtn) checkoutBtn.onclick = async (e) => {
       f.appendChild(b);
     });
   }
-
   const searchInput = el('#searchInput');
   const clearBtn = el('#clearSearch');
   function updateClearBtn(){ if(clearBtn) clearBtn.style.display = (searchInput && searchInput.value.trim().length) ? 'inline-block' : 'none'; }
@@ -591,26 +490,117 @@ if (checkoutBtn) checkoutBtn.onclick = async (e) => {
     });
   }
 
-  /* ---------- Init ---------- */
-  const yr = el('#yr'); if(yr) yr.textContent = new Date().getFullYear();
-  applyBrand();
-  buildFilters();
-  render();
-  updateCounts();
-  drawCart();
-  </script>
+  // Lightbox viewer
+  const lb = el('#lightbox'), lbImg = el('#lbImg'), lbClose = el('#lbClose');
+  document.addEventListener('click', (ev)=>{
+    const box = ev.target.closest('.thumb');
+    if (box?.dataset?.img) { lbImg.src = box.dataset.img; lb.classList.add('open'); }
+  });
+  lbClose.onclick = ()=> lb.classList.remove('open');
+  lb.addEventListener('click', (e)=>{ if(e.target===lb) lb.classList.remove('open'); });
 
-  <!-- Netlify form (hidden) -->
-  <form name="orders" data-netlify="true" netlify-honeypot="bot-field" hidden>
-    <input name="bot-field"/>
-    <input name="customer_name"/>
-    <input name="customer_email"/>
-    <input name="customer_phone"/>
-    <input name="delivery_address"/>
-    <input name="subtotal"/>
-    <input name="shipping"/>
-    <input name="total"/>
-    <textarea name="cart_json"></textarea>
-  </form>
+  /* ===================== YOCO: secure payments ===================== */
+  const YOCO_PUBLIC_KEY = "pk_live_6a754a5b9AO2rL062bf4";
+  const yoco = new window.YocoSDK({ publicKey: YOCO_PUBLIC_KEY });
+
+  // Single, safe click handler (works for both buttons)
+  async function handlePayClick(e){
+    if (!Object.keys(cart || {}).length) { alert('Your cart is empty.'); return; }
+
+    const btn = e.currentTarget;
+    const checkoutDlg = el('#checkout');
+    const cartDrawer  = el('#drawer');
+
+    const ship  = el('#ship') ? Number(el('#ship').value || 0) : 0;
+    const sum   = subtotal();
+    const total = sum + ship;
+
+    try {
+      btn.disabled = true; btn.textContent = 'Opening secure payment…';
+      // Hide our overlays so the Yoco popup is always on top
+      checkoutDlg?.classList.add('hide-for-yoco');
+      cartDrawer?.classList.add('hide-for-yoco');
+      el('#fab')?.classList.add('hide-for-yoco');
+
+      // Open Yoco popup
+      const { error: openErr, result: tokenResult } = await yoco.showPopup({
+        amountInCents: Math.round(total * 100),
+        currency: 'ZAR',
+        name: 'Formetry',
+        description: `Order for ${el('#buyerName')?.value || 'customer'}`,
+        customer: { email: el('#email')?.value || '' }
+      });
+
+      // Restore UI after popup
+      checkoutDlg?.classList.remove('hide-for-yoco');
+      cartDrawer?.classList.remove('hide-for-yoco');
+      el('#fab')?.classList.remove('hide-for-yoco');
+      btn.disabled = false; btn.textContent = 'Pay Securely with Card';
+
+      if (openErr) {
+        console.error('Yoco open error:', openErr);
+        alert('We couldn’t open the secure payment window. Please try again.');
+        return;
+      }
+      if (!tokenResult?.id) {
+        alert('Payment was cancelled. No charge was made.');
+        return;
+      }
+
+      // Send token to Netlify function to create charge
+      const name  = el('#buyerName')?.value || '';
+      const email = el('#email')?.value || '';
+      const phone = el('#phone')?.value || '';
+      const addr  = el('#addr')?.value  || '';
+
+      const res = await fetch('/.netlify/functions/yoco-charge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token: tokenResult.id,
+          amountInCents: Math.round(total * 100),
+          currency: 'ZAR',
+          description: `Formetry order for ${name}`,
+          customer: { name, email, phone },
+          shippingAddress: addr,
+          cart: JSON.stringify(cart || {})
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data?.ok) {
+        console.error('Charge error:', data);
+        alert('Payment failed. Please try a different card or contact us.');
+        return;
+      }
+
+      // Success
+      cart = {}; saveCart(); drawCart();
+      checkoutDlg?.close?.();
+      alert('Thank you! Your payment was successful.');
+    } catch (err) {
+      console.error(err);
+      checkoutDlg?.classList.remove('hide-for-yoco');
+      cartDrawer?.classList.remove('hide-for-yoco');
+      el('#fab')?.classList.remove('hide-for-yoco');
+      btn.disabled = false; btn.textContent = 'Pay Securely with Card';
+      alert('Something went wrong while processing the payment. Please try again.');
+    }
+  }
+
+  // Wire both “Pay Securely with Card” buttons to the same handler
+  if (checkoutBtnDrawer) checkoutBtnDrawer.addEventListener('click', openCheckout);
+  if (checkoutBtnDialog)  checkoutBtnDialog.addEventListener('click', handlePayClick);
+
+  // Also allow pressing the drawer button (after dialog opens) to pay
+  document.addEventListener('click', (e)=>{
+    if (e.target && e.target.id === 'checkoutBtn') { /* drawer button opens dialog only */ }
+  });
+
+  /* =========================== Init =========================== */
+  const yr = el('#yr'); if(yr) yr.textContent = new Date().getFullYear();
+  applyBrand(); buildFilters(); render(); updateCounts(); drawCart();
+  </script>
 </body>
 </html>
+
